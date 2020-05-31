@@ -45,7 +45,7 @@ jobs:
       - attach_workspace:
           at: ~/vela-template-tester
       - run: |
-          TAG=0.1.0
+          TAG=0.1.1
           docker build -t devatherock/vela-template-tester-api:$TAG -t devatherock/vela-template-tester-api:latest docker
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push devatherock/vela-template-tester-api:$TAG

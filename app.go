@@ -92,5 +92,9 @@ func main() {
         }
     })
 
+    http.HandleFunc("/api/health", func(writer http.ResponseWriter, request *http.Request) {
+        writer.Write([]byte("UP"))
+    })
+
     http.ListenAndServe(":8080", nil)
 }
