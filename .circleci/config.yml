@@ -54,18 +54,21 @@ jobs:
           docker push devatherock/vela-template-tester-api:$TAG
           docker push devatherock/vela-template-tester-api:latest
   deploy:
-    executor: heroku/default
+    docker:
+      - image: docker:19.03.6
     <<: *work_directory
     steps:
       - checkout
+      - setup_remote_docker
       - attach_workspace:
           at: ~/vela-template-tester
       - heroku/install
       - run:
           name: Build and push the docker image to registry.heroku.com
           command: |
+            docker build -t registry.heroku.com/vela-template-tester/web docker
             heroku container:login
-            heroku container:push -a vela-template-tester web
+            docker push registry.heroku.com/vela-template-tester/web
             heroku container:release -a vela-template-tester web
 
 workflows:
