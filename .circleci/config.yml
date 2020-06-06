@@ -63,7 +63,7 @@ jobs:
           name: Build and push the docker image to registry.heroku.com
           command: |
             docker build -t registry.heroku.com/vela-template-tester/web docker
-            sudo wget https://cli-assets.heroku.com/install.sh | sh
+            wget https://cli-assets.heroku.com/install.sh | sh
             heroku container:login
             docker push registry.heroku.com/vela-template-tester/web
             heroku container:release -a vela-template-tester web
