@@ -96,5 +96,10 @@ func main() {
         writer.Write([]byte("UP"))
     })
 
-    http.ListenAndServe(":8080", nil)
+    // Read from PORT environment variable available on heroku
+    port, ok := os.LookupEnv("PORT")
+    if !ok {
+        port = "8080"
+    }
+    http.ListenAndServe(":" + port, nil)
 }
