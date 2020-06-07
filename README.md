@@ -8,7 +8,7 @@ API to test and validate vela-ci templates
 
 ## API Reference
 ### Key parameters:
-- **Endpoint**: `${host}/api/expandTemplate`
+- **Endpoint**: `https://vela-template-tester.herokuapp.com/api/expandTemplate`
 - **Request Content-Type**: `application/x-yaml`
 - **Response Content-Type**: `application/x-yaml`
 
