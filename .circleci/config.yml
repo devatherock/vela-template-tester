@@ -1,8 +1,20 @@
 go_lang_image: &go_lang_image
   docker:
     - image: circleci/golang:1.14
+
+docker_image: &docker_image
+  docker:
+    - image: docker:19.03.6
+
+template_tester_image: &template_tester_image
+  docker:
+    - image: devatherock/vela-template-tester:0.2.0
+
 work_directory: &work_directory
   working_directory: ~/vela-template-tester
+
+resource_class: &resource_class
+  resource_class: small
 
 orbs:
   heroku: circleci/heroku@1.0.1
@@ -11,15 +23,28 @@ version: 2.1
 jobs:
   test:
     <<: *go_lang_image
+    <<: *resource_class
     <<: *work_directory
     steps:
       - checkout
       - restore_cache:
           keys:
             - v1-pkg-cache
-      - run: go vet
+      - run: go vet app.go validator.go util.go
+  test_plugin:
+    <<: *go_lang_image
+    <<: *resource_class
+    <<: *work_directory
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pkg-cache
+      - run: go vet plugin.go validator.go util.go
+
   build:
     <<: *go_lang_image
+    <<: *resource_class
     environment:
       CGO_ENABLED: 0
       GOOS: linux
@@ -29,7 +54,7 @@ jobs:
       - restore_cache:
           keys:
             - v1-pkg-cache
-      - run: go build -o docker/velatemplatetesterapi app.go
+      - run: go build -o docker/velatemplatetesterapi app.go validator.go util.go
       - save_cache:
           paths:
             - "/go/pkg"
@@ -38,9 +63,31 @@ jobs:
           root: ~/vela-template-tester
           paths:
             - docker/velatemplatetesterapi
+  build_plugin:
+    <<: *go_lang_image
+    <<: *resource_class
+    environment:
+      CGO_ENABLED: 0
+      GOOS: linux
+    <<: *work_directory
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pkg-cache
+      - run: go build -o docker/velatemplatetesterplugin plugin.go validator.go util.go
+      - save_cache:
+          paths:
+            - "/go/pkg"
+          key: v1-pkg-cache
+      - persist_to_workspace:
+          root: ~/vela-template-tester
+          paths:
+            - docker/velatemplatetesterplugin
+
   publish:
-    docker:
-      - image: docker:19.03.6
+    <<: *docker_image
+    <<: *resource_class
     <<: *work_directory
     steps:
       - checkout
@@ -48,13 +95,60 @@ jobs:
       - attach_workspace:
           at: ~/vela-template-tester
       - run: |
-          TAG=0.1.1
-          docker build -t devatherock/vela-template-tester-api:$TAG -t devatherock/vela-template-tester-api:latest docker
+          TAG=0.2.0
+          docker build -t devatherock/vela-template-tester-api:$TAG -f Api.Dockerfile docker
+          docker tag devatherock/vela-template-tester-api:$TAG devatherock/vela-template-tester-api:latest
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push devatherock/vela-template-tester-api:$TAG
           docker push devatherock/vela-template-tester-api:latest
+
+  publish_plugin:
+    <<: *docker_image
+    <<: *resource_class
+    <<: *work_directory
+    steps:
+      - checkout
+      - setup_remote_docker
+      - attach_workspace:
+          at: ~/vela-template-tester
+      - run: |
+          TAG=0.2.0
+          docker build -t devatherock/vela-template-tester:$TAG -f Plugin.Dockerfile docker
+          docker tag devatherock/vela-template-tester:$TAG devatherock/vela-template-tester:latest
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker push devatherock/vela-template-tester:$TAG
+          docker push devatherock/vela-template-tester:latest
+
+  test_plugin_single:
+    <<: *template_tester_image
+    <<: *resource_class
+    <<: *work_directory
+    environment:
+      PARAMETER_INPUT_FILE: "templates/input_template.yml"
+      PARAMETER_VARIABLES: '{"notification_branch":"develop","notification_event":"push"}'
+      PARAMETER_EXPECTED_OUTPUT: "templates/output_template.yml"
+      PARAMETER_LOG_LEVEL: debug
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/vela-template-tester
+      - run: /bin/velatemplatetesterplugin
+
+  test_plugin_list:
+    <<: *template_tester_image
+    <<: *resource_class
+    <<: *work_directory
+    environment:
+      PARAMETER_TEMPLATES: '[{"input_file":"templates/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"templates/output_template.yml"}]'
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/vela-template-tester
+      - run: /bin/velatemplatetesterplugin
+
   deploy:
     executor: heroku/default
+    <<: *resource_class
     <<: *work_directory
     steps:
       - checkout
@@ -65,7 +159,7 @@ jobs:
       - run:
           name: Build and push the docker image to registry.heroku.com
           command: |
-            docker build -t registry.heroku.com/vela-template-tester/web docker
+            docker build -t registry.heroku.com/vela-template-tester/web -f Api.Dockerfile docker
             heroku container:login
             docker push registry.heroku.com/vela-template-tester/web
             heroku container:release -a vela-template-tester web
@@ -84,9 +178,28 @@ workflows:
       - deploy:
           requires:
             - publish
+  create_plugin:
+    jobs:
+      - build_plugin:
+          filters:
+            branches:
+              only: master
+      - publish_plugin:
+          requires:
+            - build_plugin
+      - test_plugin_single:
+          requires:
+            - publish_plugin
+      - test_plugin_list:
+          requires:
+            - publish_plugin
   pr_check:
     jobs:
       - test:
+          filters:
+            branches:
+              ignore: master
+      - test_plugin:
           filters:
             branches:
               ignore: master

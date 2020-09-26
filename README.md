@@ -1,10 +1,10 @@
 [![CircleCI](https://circleci.com/gh/devatherock/vela-template-tester.svg?style=svg)](https://circleci.com/gh/devatherock/vela-template-tester)
-[![Docker Pulls](https://img.shields.io/docker/pulls/devatherock/vela-template-tester-api.svg)](https://hub.docker.com/r/devatherock/vela-template-tester-api/)
-[![Docker Image Size](https://img.shields.io/docker/image-size/devatherock/vela-template-tester-api.svg?sort=date)](https://hub.docker.com/r/devatherock/vela-template-tester-api/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/devatherock/vela-template-tester.svg)](https://hub.docker.com/r/devatherock/vela-template-tester/)
+[![Docker Image Size](https://img.shields.io/docker/image-size/devatherock/vela-template-tester.svg?sort=date)](https://hub.docker.com/r/devatherock/vela-template-tester/)
 [![Docker Image Layers](https://img.shields.io/microbadger/layers/devatherock/vela-template-tester-api.svg)](https://microbadger.com/images/devatherock/vela-template-tester-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 # vela-template-tester
-API to test and validate [vela-ci templates](https://go-vela.github.io/docs/templates/overview/)
+API and vela plugin to test and validate [vela-ci templates](https://go-vela.github.io/docs/templates/overview/)
 
 ## API Reference
 ### Key parameters:
@@ -109,3 +109,6 @@ template: |-
           Success: {{.BuildLink}} ({{.BuildRef}}) by {{.BuildAuthor}}
           {{.BuildMessage}}
 ```
+
+## Plugin Reference
+Please refer [docs](DOCS.md)

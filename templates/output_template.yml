@@ -1,0 +1,18 @@
+metadata:
+  template: true
+
+slack_plugin_image: &slack_plugin_image
+  image: devatherock/simple-slack:0.2.0
+
+steps:
+  - name: notify_success
+    ruleset:
+      branch: develop
+      event: push
+    <<: *slack_plugin_image
+    secrets: [ slack_webhook ]
+    parameters:
+      color: "#33ad7f"
+      text: |-
+        Success: {{.BuildLink}} ({{.BuildRef}}) by {{.BuildAuthor}}
+        {{.BuildMessage}}
