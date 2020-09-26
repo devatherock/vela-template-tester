@@ -96,7 +96,7 @@ jobs:
           at: ~/vela-template-tester
       - run: |
           TAG=0.2.0
-          docker build -t devatherock/vela-template-tester-api:$TAG -f Api.Dockerfile docker
+          docker build -t devatherock/vela-template-tester-api:$TAG -f docker/Api.Dockerfile docker
           docker tag devatherock/vela-template-tester-api:$TAG devatherock/vela-template-tester-api:latest
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push devatherock/vela-template-tester-api:$TAG
@@ -113,7 +113,7 @@ jobs:
           at: ~/vela-template-tester
       - run: |
           TAG=0.2.0
-          docker build -t devatherock/vela-template-tester:$TAG -f Plugin.Dockerfile docker
+          docker build -t devatherock/vela-template-tester:$TAG -f docker/Plugin.Dockerfile docker
           docker tag devatherock/vela-template-tester:$TAG devatherock/vela-template-tester:latest
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push devatherock/vela-template-tester:$TAG
@@ -159,7 +159,7 @@ jobs:
       - run:
           name: Build and push the docker image to registry.heroku.com
           command: |
-            docker build -t registry.heroku.com/vela-template-tester/web -f Api.Dockerfile docker
+            docker build -t registry.heroku.com/vela-template-tester/web -f docker/Api.Dockerfile docker
             heroku container:login
             docker push registry.heroku.com/vela-template-tester/web
             heroku container:release -a vela-template-tester web

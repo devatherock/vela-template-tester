@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.0] - 2020-09-26
+### Added
+- vela plugin to test vela templates
+
 ## [0.1.3] - 2020-06-06
 ### Added
 - Ability to use `PORT` environment variable as port, for Heroku.
