@@ -202,8 +202,8 @@ workflows:
           tag: "0.2.0,latest"
           use-remote-docker: true
           docker-username: DOCKER_USERNAME
-          dockerfile: Plugin.Dockerfile
-          path: docker
+          dockerfile: docker/Plugin.Dockerfile
+          docker-context: docker
       - test_plugin_single:
           context:
             - docker-credentials
