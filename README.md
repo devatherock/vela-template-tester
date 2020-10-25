@@ -1,7 +1,8 @@
 [![CircleCI](https://circleci.com/gh/devatherock/vela-template-tester.svg?style=svg)](https://circleci.com/gh/devatherock/vela-template-tester)
+[![Version](https://img.shields.io/docker/v/devatherock/vela-template-tester?sort=date)](https://hub.docker.com/r/devatherock/vela-template-tester/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/devatherock/vela-template-tester.svg)](https://hub.docker.com/r/devatherock/vela-template-tester/)
 [![Docker Image Size](https://img.shields.io/docker/image-size/devatherock/vela-template-tester.svg?sort=date)](https://hub.docker.com/r/devatherock/vela-template-tester/)
-[![Docker Image Layers](https://img.shields.io/microbadger/layers/devatherock/vela-template-tester-api.svg)](https://microbadger.com/images/devatherock/vela-template-tester-api)
+[![Docker Image Layers](https://img.shields.io/microbadger/layers/devatherock/vela-template-tester.svg)](https://microbadger.com/images/devatherock/vela-template-tester)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 # vela-template-tester
 API and vela plugin to test and validate [vela-ci templates](https://go-vela.github.io/docs/templates/overview/)
