@@ -1,27 +1,29 @@
 clean:
 	rm coverage.out || true
 	rm coverage.html || true
+	rm test-report.json || true
 	rm docker/velatemplatetesterapi || true
 	rm docker/velatemplatetesterplugin || true
 test-api:
-	go test app_test.go validator_test.go util_test.go app.go validator.go util.go -v -race -coverprofile=coverage.out
+	go test -v -tags api -race -coverprofile=coverage.out
 	go tool cover -html=coverage.out -o coverage.html
 test-plugin:
-	go test plugin_test.go validator_test.go util_test.go plugin.go validator.go util.go -v -race -coverprofile=coverage.out
+	go test -v -tags plugin -race -coverprofile=coverage.out
 	go tool cover -html=coverage.out -o coverage.html	
 check:
 	gofmt -l -w -s .
-	go vet app.go validator.go util.go
-	go vet plugin.go validator.go util.go
-	go test app_test.go validator_test.go util_test.go app.go validator.go util.go
-	go test plugin_test.go validator_test.go util_test.go plugin.go validator.go util.go
+	go vet -tags api
+	go vet -tags plugin
+	go test -tags api
+	go test -tags plugin
 coveralls:
-	go test plugin_test.go validator_test.go util_test.go plugin.go validator.go util.go -v -covermode=count -coverprofile=coverage.out -json > test-report.json
+	go test -v -tags plugin -covermode=count -coverprofile=coverage.out -json > test-report.json
 	go get github.com/mattn/goveralls
 	${GOPATH}/bin/goveralls -coverprofile=coverage.out
 run:
-	go run app.go validator.go util.go || true
+	go build -o docker/velatemplatetesterapi -tags api
+	./docker/velatemplatetesterapi
 build-api:
-	go build -o docker/velatemplatetesterapi app.go validator.go util.go
+	go build -o docker/velatemplatetesterapi -tags api
 build-plugin:
-	go build -o docker/velatemplatetesterplugin plugin.go validator.go util.go
+	go build -o docker/velatemplatetesterplugin -tags plugin

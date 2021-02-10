@@ -68,7 +68,9 @@ jobs:
           keys:
             - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
-      - run: make build-plugin
+      - run: |
+          make coveralls
+          make build-plugin
       - save_cache:
           paths:
             - "/go/pkg"
