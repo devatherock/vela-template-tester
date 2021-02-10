@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- test: Basic tests so that coveralls and Sonar can be introduced
+
 ## [0.2.0] - 2020-09-26
 ### Added
 - vela plugin to test vela templates

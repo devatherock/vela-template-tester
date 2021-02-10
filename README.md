@@ -1,9 +1,10 @@
 [![CircleCI](https://circleci.com/gh/devatherock/vela-template-tester.svg?style=svg)](https://circleci.com/gh/devatherock/vela-template-tester)
-[![Version](https://img.shields.io/docker/v/devatherock/vela-template-tester?sort=date)](https://hub.docker.com/r/devatherock/vela-template-tester/)
+[![Version](https://img.shields.io/docker/v/devatherock/vela-template-tester?sort=semver)](https://hub.docker.com/r/devatherock/vela-template-tester/)
+[![Coverage Status](https://coveralls.io/repos/github/devatherock/vela-template-tester/badge.svg?branch=master)](https://coveralls.io/github/devatherock/vela-template-tester?branch=master)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=vela-template-tester&metric=alert_status)](https://sonarcloud.io/component_measures?id=vela-template-tester&metric=alert_status&view=list)
 [![Docker Pulls](https://img.shields.io/docker/pulls/devatherock/vela-template-tester.svg)](https://hub.docker.com/r/devatherock/vela-template-tester/)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=vela-template-tester&metric=ncloc)](https://sonarcloud.io/component_measures?id=vela-template-tester&metric=ncloc)
 [![Docker Image Size](https://img.shields.io/docker/image-size/devatherock/vela-template-tester.svg?sort=date)](https://hub.docker.com/r/devatherock/vela-template-tester/)
-[![Docker Image Layers](https://img.shields.io/microbadger/layers/devatherock/vela-template-tester.svg)](https://microbadger.com/images/devatherock/vela-template-tester)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 # vela-template-tester
 API and vela plugin to test and validate [vela-ci templates](https://go-vela.github.io/docs/templates/overview/)
 
