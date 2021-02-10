@@ -1,20 +1,6 @@
-go_lang_image: &go_lang_image
-  docker:
-    - image: circleci/golang:1.14
-      auth:
-        username: $DOCKER_USERNAME
-        password: $DOCKER_PASSWORD
-
-docker_image: &docker_image
-  docker:
-    - image: docker:19.03.6
-      auth:
-        username: $DOCKER_USERNAME
-        password: $DOCKER_PASSWORD
-
 template_tester_image: &template_tester_image
   docker:
-    - image: devatherock/vela-template-tester:0.2.0
+    - image: devatherock/vela-template-tester:latest
       auth:
         username: $DOCKER_USERNAME
         password: $DOCKER_PASSWORD
@@ -31,87 +17,76 @@ resource_class: &resource_class
   
 executors:
   docker-executor:
-    <<: *go_lang_image
+    docker:
+      - image: circleci/golang:1.14
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
     <<: *resource_class
     <<: *work_directory
 
 version: 2.1
 jobs:
   test:
-    <<: *go_lang_image
-    <<: *resource_class
-    <<: *work_directory
+    executor: docker-executor
     steps:
       - checkout
       - restore_cache:
           keys:
+            - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
-      - run: go vet app.go validator.go util.go
-  test_plugin:
-    <<: *go_lang_image
-    <<: *resource_class
-    <<: *work_directory
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-pkg-cache
-      - run: go vet plugin.go validator.go util.go
+      - run: make check
 
   build:
-    <<: *go_lang_image
-    <<: *resource_class
+    executor: docker-executor
     environment:
       CGO_ENABLED: 0
       GOOS: linux
-    <<: *work_directory
     steps:
       - checkout
       - restore_cache:
           keys:
+            - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
-      - run: go build -o docker/velatemplatetesterapi app.go validator.go util.go
+      - run: make build-api
       - save_cache:
           paths:
             - "/go/pkg"
-          key: v1-pkg-cache
+          key: v1-pkg-cache-{{ checksum "go.mod" }}
       - persist_to_workspace:
           root: ~/vela-template-tester
           paths:
             - docker/velatemplatetesterapi
   build_plugin:
-    <<: *go_lang_image
-    <<: *resource_class
+    executor: docker-executor
     environment:
       CGO_ENABLED: 0
       GOOS: linux
-    <<: *work_directory
     steps:
       - checkout
       - restore_cache:
           keys:
+            - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
-      - run: go build -o docker/velatemplatetesterplugin plugin.go validator.go util.go
+      - run: make build-plugin
       - save_cache:
           paths:
             - "/go/pkg"
-          key: v1-pkg-cache
+          key: v1-pkg-cache-{{ checksum "go.mod" }}
       - persist_to_workspace:
           root: ~/vela-template-tester
           paths:
             - docker/velatemplatetesterplugin
 
   publish:
-    <<: *docker_image
-    <<: *resource_class
-    <<: *work_directory
+    executor: docker-executor
     steps:
       - checkout
       - setup_remote_docker
       - attach_workspace:
           at: ~/vela-template-tester
       - run: |
-          TAG=0.2.0
+          TAG=${CIRCLE_SHA1:0:8}
           docker build -t devatherock/vela-template-tester-api:$TAG -f docker/Api.Dockerfile docker
           docker tag devatherock/vela-template-tester-api:$TAG devatherock/vela-template-tester-api:latest
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
@@ -162,9 +137,53 @@ jobs:
             heroku container:login
             docker push registry.heroku.com/vela-template-tester/web
             heroku container:release -a vela-template-tester web
+            
+  release_api:
+    executor: docker-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - attach_workspace:
+          at: ~/vela-template-tester
+      - run: |
+          TAG=${CIRCLE_TAG#v}
+          DEV_TAG=${CIRCLE_SHA1:0:8}
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker pull devatherock/vela-template-tester-api:$DEV_TAG
+          docker tag devatherock/vela-template-tester-api:$DEV_TAG devatherock/vela-template-tester-api:$TAG
+          docker push devatherock/vela-template-tester-api:$TAG
+          
+  release_plugin:
+    executor: docker-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - attach_workspace:
+          at: ~/vela-template-tester
+      - run: |
+          TAG=${CIRCLE_TAG#v}
+          DEV_TAG=${CIRCLE_SHA1:0:8}
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker pull devatherock/vela-template-tester:$DEV_TAG
+          docker tag devatherock/vela-template-tester:$DEV_TAG devatherock/vela-template-tester:$TAG
+          docker push devatherock/vela-template-tester:$TAG          
+            
+  notify:
+    docker:
+      - image: devatherock/simple-slack:0.5.0
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
+    <<: *resource_class
+    environment:
+      TEXT: "Success: {{.CircleBuildUrl}} by {{.CircleUsername}}"
+      CHANNEL: general
+      TITLE: "Build completed"
+    steps:
+      - run: /bin/simpleslack -c "#33ad7f"            
 
 workflows:
-  version: 2
+  version: 2.1
   build_deploy:
     jobs:
       - build:
@@ -183,6 +202,13 @@ workflows:
             - docker-credentials
           requires:
             - publish
+      - notify:
+          context:
+            - docker-credentials
+            - slack-webhook
+          requires:
+            - deploy         
+            
   create_plugin:
     jobs:
       - build_plugin:
@@ -192,14 +218,15 @@ workflows:
             branches:
               only: master
       - docker/publish:
+          name: publish_plugin
           executor: docker-executor
           context:
             - docker-credentials
           requires:
             - build_plugin
-          image: devatherock/vela-template-tester  
+          image: devatherock/vela-template-tester
           attach-at: ~/vela-template-tester
-          tag: "0.2.0,latest"
+          tag: "${CIRCLE_SHA1:0:8},latest"
           use-remote-docker: true
           docker-username: DOCKER_USERNAME
           dockerfile: docker/Plugin.Dockerfile
@@ -208,12 +235,54 @@ workflows:
           context:
             - docker-credentials
           requires:
-            - docker/publish
+            - publish_plugin
       - test_plugin_list:
           context:
             - docker-credentials
           requires:
-            - docker/publish
+            - publish_plugin
+      - notify:
+          context:
+            - docker-credentials
+            - slack-webhook
+          requires:
+            - test_plugin_single
+            - test_plugin_list
+            
+  release_api:
+    jobs:
+      - release_api:
+          context:
+            - docker-credentials
+          filters:
+            branches:
+              only: non-existent-branch
+            tags:
+              only: /^v[0-9\.]+$/
+      - notify:
+          context:
+            - docker-credentials
+            - slack-webhook
+          requires:
+            - release_api
+            
+  release_plugin:
+    jobs:
+      - release_plugin:
+          context:
+            - docker-credentials
+          filters:
+            branches:
+              only: non-existent-branch
+            tags:
+              only: /^v[0-9\.]+$/        
+      - notify:
+          context:
+            - docker-credentials
+            - slack-webhook
+          requires:
+            - release_plugin
+            
   pr_check:
     jobs:
       - test:
