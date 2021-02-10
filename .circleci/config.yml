@@ -291,9 +291,3 @@ workflows:
           filters:
             branches:
               ignore: master
-      - test_plugin:
-          context:
-            - docker-credentials
-          filters:
-            branches:
-              ignore: master
