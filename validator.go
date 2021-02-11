@@ -22,16 +22,20 @@ type ValidationRequest struct {
 	Template   string
 }
 
-func validate(validationRequest ValidationRequest) ValidationResponse {
+func validate(validationRequest ValidationRequest) (validationResponse ValidationResponse) {
+	validationResponse = ValidationResponse{}
+
+	// Error response in case of a panic
+	validationResponse.Message = "Invalid template"
+	defer handlePanic()
+
 	// Process template
 	buffer := new(bytes.Buffer)
 	parsedTemplate, err := template.New("test").Funcs(sprig.TxtFuncMap()).Parse(validationRequest.Template)
 	err = parsedTemplate.Execute(buffer, validationRequest.Parameters)
 
-	validationResponse := ValidationResponse{}
 	if err != nil {
 		validationResponse.Error = err.Error()
-		validationResponse.Message = "Invalid template"
 	} else {
 		processedTemplate := make(map[interface{}]interface{})
 
@@ -50,4 +54,10 @@ func validate(validationRequest ValidationRequest) ValidationResponse {
 	}
 
 	return validationResponse
+}
+
+func handlePanic() {
+	if error := recover(); error != nil {
+		log.Error("Recovering from panic: ", error)
+	}
 }
