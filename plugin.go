@@ -115,9 +115,8 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 		if variables != "" {
 			parsedVariables := make(map[string]interface{})
 			error := json.Unmarshal([]byte(variables), &parsedVariables)
-			if error != nil {
-				log.Fatal(error)
-			}
+			handleError(error)
+
 			pluginValidationRequest.Variables = parsedVariables
 		}
 
@@ -133,9 +132,8 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 	if templates != "" {
 		suppliedValidationRequests := []PluginValidationRequest{}
 		error := json.Unmarshal([]byte(templates), &suppliedValidationRequests)
-		if error != nil {
-			log.Fatal(error)
-		}
+		handleError(error)
+
 		pluginValidationRequests = append(pluginValidationRequests, suppliedValidationRequests...)
 	}
 
@@ -151,21 +149,16 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 func verifyOutput(request PluginValidationRequest, validationResponse ValidationResponse) bool {
 	if request.ExpectedOutput != "" {
 		expectedOutput, error := ioutil.ReadFile(request.ExpectedOutput)
-		if error != nil {
-			log.Fatal(error)
-		}
+		handleError(error)
 
 		expectedOutputMap := make(map[interface{}]interface{})
 		error = yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
-		if error != nil {
-			log.Fatal(error)
-		}
+		handleError(error)
 
 		processedTemplateMap := make(map[interface{}]interface{})
 		error = yaml.Unmarshal([]byte(validationResponse.Template), &processedTemplateMap)
-		if error != nil {
-			log.Fatal(error)
-		}
+		handleError(error)
+
 		return reflect.DeepEqual(expectedOutputMap, processedTemplateMap)
 	}
 
