@@ -1,0 +1,5 @@
+steps:
+  - name: notify_success
+    ruleset:
+      branch: [ develop
+    image: devatherock/simple-slack:0.2.0

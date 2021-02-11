@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO merge test with TestMain once it is added
 func TestInit(test *testing.T) {
 	setEnvironmentVariable(test, "PARAMETER_LOG_LEVEL", "debug")
 
