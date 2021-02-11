@@ -23,3 +23,9 @@ func initLogLevel() {
 	// set global log level
 	log.SetLevel(logLevel)
 }
+
+func handleError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
