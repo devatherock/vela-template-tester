@@ -20,9 +20,12 @@ coveralls:
 	go test -v -tags plugin -covermode=count -coverprofile=coverage.out -json > test-report.json
 	go get github.com/mattn/goveralls
 	${GOPATH}/bin/goveralls -coverprofile=coverage.out
-run:
+run-api:
 	go build -o docker/velatemplatetesterapi -tags api
 	./docker/velatemplatetesterapi
+run-plugin:
+	go build -o docker/velatemplatetesterplugin -tags plugin
+	./docker/velatemplatetesterplugin	
 build-api:
 	go build -o docker/velatemplatetesterapi -tags api
 build-plugin:

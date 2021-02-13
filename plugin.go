@@ -4,6 +4,8 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -17,11 +19,6 @@ type PluginValidationRequest struct {
 	InputFile      string                 `json:"input_file,omitempty"`
 	Variables      map[string]interface{} `json:",omitempty"`
 	ExpectedOutput string                 `json:"expected_output,omitempty"`
-}
-
-// Initializes log level
-func init() {
-	initLogLevel()
 }
 
 // Plugin entry point. Defines plugin parameters
@@ -57,15 +54,13 @@ func main() {
 	}
 
 	err := app.Run(os.Args)
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleError(err)
 }
 
 // Tests the supplied templates using the validator
 func run(context *cli.Context) error {
 	pluginValidationRequests := readInputParameters(context)
-	var validationFailure bool
+	var validationStatus error
 
 	for _, request := range pluginValidationRequests {
 		validationRequest := ValidationRequest{}
@@ -79,25 +74,19 @@ func run(context *cli.Context) error {
 
 		validationResponse := validate(validationRequest)
 		if validationResponse.Error != "" {
-			log.Errorf("Template '%s' is not valid. Error: %s", request.InputFile, validationResponse.Error)
-			validationFailure = true
+			validationStatus = errors.New(fmt.Sprintf("Template '%s' is not valid. Error: %s", request.InputFile, validationResponse.Error))
 		} else {
 			validationResult := verifyOutput(request, validationResponse)
 
 			if validationResult {
 				log.Printf("Template '%s' is valid.", request.InputFile)
 			} else {
-				log.Errorf("Template '%s' is valid, but did not match expected output", request.InputFile)
-				validationFailure = true
+				validationStatus = errors.New(fmt.Sprintf("Template '%s' is valid, but did not match expected output", request.InputFile))
 			}
 		}
 	}
 
-	if validationFailure {
-		os.Exit(1)
-	}
-
-	return nil
+	return validationStatus
 }
 
 // Reads plugin input parameters
@@ -139,7 +128,6 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 
 	if len(pluginValidationRequests) == 0 {
 		log.Warn("No templates specified")
-		os.Exit(0)
 	}
 
 	return pluginValidationRequests
