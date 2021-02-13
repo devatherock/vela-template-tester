@@ -11,11 +11,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Initializes log level
-func init() {
-	initLogLevel()
-}
-
 func main() {
 	http.HandleFunc("/api/expandTemplate", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "application/x-yaml")

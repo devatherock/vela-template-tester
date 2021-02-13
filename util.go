@@ -6,6 +6,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Initializes log level
+func init() {
+	initLogLevel()
+}
+
 func initLogLevel() {
 	level, ok := os.LookupEnv("PARAMETER_LOG_LEVEL")
 

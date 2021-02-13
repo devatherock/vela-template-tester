@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"io/ioutil"
 	"testing"
@@ -11,11 +12,55 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+func TestRun(test *testing.T) {
+	cases := []struct {
+		parameters map[string]string
+		expected   error
+	}{
+		{
+			map[string]string{
+				"input-file": "templates/input_template.yml",
+			},
+			nil,
+		},
+		{
+			map[string]string{
+				"input-file": "templates/input_invalid_template.yml",
+				"variables":  `{"notification_branch":"develop"}`,
+			},
+			errors.New("Template 'templates/input_invalid_template.yml' is not valid. Error: yaml: line 4: did not find expected ',' or ']'"),
+		},
+		{
+			map[string]string{
+				"input-file":      "templates/input_template.yml",
+				"expected-output": "templates/output_template.yml",
+			},
+			errors.New("Template 'templates/input_template.yml' is valid, but did not match expected output"),
+		},
+	}
+
+	for _, data := range cases {
+		set := flag.NewFlagSet("test", 0)
+		for key, value := range data.parameters {
+			set.String(key, value, "")
+		}
+
+		context := cli.NewContext(nil, set, nil)
+		actual := run(context)
+
+		assert.Equal(test, data.expected, actual)
+	}
+}
+
 func TestReadInputParameters(test *testing.T) {
 	cases := []struct {
 		parameters map[string]string
 		expected   []PluginValidationRequest
 	}{
+		{
+			map[string]string{},
+			[]PluginValidationRequest{},
+		},
 		{
 			map[string]string{
 				"input-file": "templates/input_template.yml",
