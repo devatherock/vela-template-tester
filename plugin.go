@@ -21,8 +21,13 @@ type PluginValidationRequest struct {
 	ExpectedOutput string                 `json:"expected_output,omitempty"`
 }
 
-// Plugin entry point. Defines plugin parameters
+// Plugin entry point
 func main() {
+	runApp(os.Args)
+}
+
+// Initializes and runs the app
+func runApp(args []string) {
 	app := cli.NewApp()
 	app.Name = "vela template tester plugin"
 	app.Action = run
@@ -53,7 +58,7 @@ func main() {
 		},
 	}
 
-	err := app.Run(os.Args)
+	err := app.Run(args)
 	handleError(err)
 }
 

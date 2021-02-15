@@ -12,6 +12,85 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+func TestRunAppWithIndividualEnvVariables(test *testing.T) {
+	cases := []struct {
+		inputFileEnv      string
+		variablesEnv      string
+		expectedOutputEnv string
+	}{
+		{
+			"PARAMETER_INPUT_FILE",
+			"PARAMETER_VARIABLES",
+			"PARAMETER_EXPECTED_OUTPUT",
+		},
+		{
+			"INPUT_FILE",
+			"VARIABLES",
+			"EXPECTED_OUTPUT",
+		},
+	}
+
+	for _, data := range cases {
+		setEnvironmentVariable(test, data.inputFileEnv, "templates/input_template.yml")
+		setEnvironmentVariable(test, data.variablesEnv, `{"notification_branch":"develop","notification_event":"push"}`)
+		setEnvironmentVariable(test, data.expectedOutputEnv, "templates/output_template.yml")
+
+		runApp([]string{"-x", "dummy"})
+	}
+}
+
+func TestRunAppWithTemplatesEnvVariable(test *testing.T) {
+	cases := []string{
+		"PARAMETER_TEMPLATES",
+		"TEMPLATES",
+	}
+
+	for _, data := range cases {
+		setEnvironmentVariable(test, data, `[{"input_file":"templates/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"templates/output_template.yml"}]`)
+		runApp([]string{"-x", "dummy"})
+	}
+}
+
+func TestRunAppWithIndividualParameters(test *testing.T) {
+	cases := []struct {
+		inputFileParam      string
+		variablesParam      string
+		expectedOutputParam string
+	}{
+		{
+			"--input-file",
+			"--variables",
+			"--expected-output",
+		},
+		{
+			"-tf",
+			"-v",
+			"-o",
+		},
+	}
+
+	for _, data := range cases {
+		arguments := []string{
+			data.inputFileParam, "templates/input_template.yml",
+			data.variablesParam, `{"notification_branch":"develop","notification_event":"push"}`,
+			data.expectedOutputParam, "templates/output_template.yml",
+		}
+
+		runApp(arguments)
+	}
+}
+
+func TestRunAppWithTemplatesParameter(test *testing.T) {
+	cases := []string{
+		"--templates",
+		"-ts",
+	}
+
+	for _, data := range cases {
+		runApp([]string{data, `[{"input_file":"templates/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"templates/output_template.yml"}]`})
+	}
+}
+
 func TestRun(test *testing.T) {
 	cases := []struct {
 		parameters map[string]string
