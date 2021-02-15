@@ -29,6 +29,7 @@ func initLogLevel() {
 	log.SetLevel(logLevel)
 }
 
+// Logs the error and exits the application
 func handleError(err error) {
 	if err != nil {
 		log.Fatal(err)
