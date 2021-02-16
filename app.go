@@ -12,39 +12,50 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/api/expandTemplate", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "application/x-yaml")
+	http.HandleFunc("/api/expandTemplate", expandTemplate)
+	http.HandleFunc("/api/health", checkHealth)
 
-		// Read request
-		requestBody, err := ioutil.ReadAll(request.Body)
-		if err != nil {
-			return
-		}
+	http.ListenAndServe(":"+lookupPort(), nil)
+}
 
-		// Parse request
-		validationRequest := ValidationRequest{}
-		err = yaml.Unmarshal(requestBody, &validationRequest)
+// Handles /api/expandTemplate endpoint. Expands supplied template with
+// the supplied parameters, to verify if it is valid
+func expandTemplate(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Content-Type", "application/x-yaml")
 
-		// Validate template
-		validationResponse := validate(validationRequest)
+	// Read request
+	requestBody, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		return
+	}
 
-		// Write response
-		responseBody, err := yaml.Marshal(&validationResponse)
-		if err != nil {
-			log.Error("error: ", err)
-		} else {
-			writer.Write(responseBody)
-		}
-	})
+	// Parse request
+	validationRequest := ValidationRequest{}
+	err = yaml.Unmarshal(requestBody, &validationRequest)
 
-	http.HandleFunc("/api/health", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Write([]byte("UP"))
-	})
+	// Validate template
+	validationResponse := validate(validationRequest)
 
-	// Read from PORT environment variable available on heroku
+	// Write response
+	responseBody, err := yaml.Marshal(&validationResponse)
+	if err != nil {
+		log.Error("error: ", err)
+	} else {
+		writer.Write(responseBody)
+	}
+}
+
+// Handles /api/health endpoint. Indicates the health of the application
+func checkHealth(writer http.ResponseWriter, request *http.Request) {
+	writer.Write([]byte("UP"))
+}
+
+// Reads port from PORT environment variable available on heroku
+func lookupPort() string {
 	port, ok := os.LookupEnv("PORT")
 	if !ok {
 		port = "8080"
 	}
-	http.ListenAndServe(":"+port, nil)
+
+	return port
 }
