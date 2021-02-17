@@ -49,10 +49,6 @@ jobs:
             - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
       - run: make build-api
-      - save_cache:
-          paths:
-            - "/go/pkg"
-          key: v1-pkg-cache-{{ checksum "go.mod" }}
       - persist_to_workspace:
           root: ~/vela-template-tester
           paths:
@@ -79,6 +75,19 @@ jobs:
           root: ~/vela-template-tester
           paths:
             - docker/velatemplatetesterplugin
+            
+  integration_test:
+    executor: docker-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/vela-template-tester
+      - restore_cache:
+          keys:
+            - v1-pkg-cache-{{ checksum "go.mod" }}
+            - v1-pkg-cache
+      - run: |
+          make integration-test
 
   publish:
     executor: docker-executor
@@ -220,13 +229,18 @@ workflows:
           filters:
             branches:
               only: master
+      - integration_test:
+          context:
+            - docker-credentials
+          requires:
+            - build_plugin
       - docker/publish:
           name: publish_plugin
           executor: docker-executor
           context:
             - docker-credentials
           requires:
-            - build_plugin
+            - integration_test
           image: devatherock/vela-template-tester
           attach-at: ~/vela-template-tester
           tag: "${CIRCLE_SHA1:0:8},latest"

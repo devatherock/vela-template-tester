@@ -9,7 +9,7 @@ test-api:
 	go tool cover -html=coverage.out -o coverage.html
 test-plugin:
 	go test -v -tags plugin -race -coverprofile=coverage.out
-	go tool cover -html=coverage.out -o coverage.html	
+	go tool cover -html=coverage.out -o coverage.html
 check:
 	gofmt -l -w -s .
 	go vet -tags api
@@ -30,3 +30,5 @@ build-api:
 	go build -o docker/velatemplatetesterapi -tags api
 build-plugin:
 	go build -o docker/velatemplatetesterplugin -tags plugin
+integration-test:
+	go test -v -tags integration

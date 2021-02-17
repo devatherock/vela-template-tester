@@ -1,4 +1,4 @@
-// +build !api
+// +build !api,!integration
 
 package main
 

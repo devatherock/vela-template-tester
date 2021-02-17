@@ -1,4 +1,4 @@
-// +build !plugin
+// +build !plugin,!integration
 
 package main
 
