@@ -49,7 +49,7 @@ func TestValidateParseError(test *testing.T) {
 
 	validationResponse := validate(validationRequest)
 	assert.Equal(test, "Invalid template", validationResponse.Message)
-	assert.Equal(test, "", validationResponse.Error)
+	assert.Equal(test, "Unable to parse template", validationResponse.Error)
 	assert.Equal(test, "", validationResponse.Template)
 }
 

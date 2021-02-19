@@ -114,7 +114,7 @@ func TestRun(test *testing.T) {
 				"input-file": "templates/input_invalid_template.yml",
 				"variables":  `{"notification_branch":"develop"}`,
 			},
-			errors.New("Template 'templates/input_invalid_template.yml' is not valid. Error: yaml: line 4: did not find expected ',' or ']'"),
+			errors.New("Template 'templates/input_invalid_template.yml' is invalid. Error: yaml: line 4: did not find expected ',' or ']'"),
 		},
 		{
 			map[string]string{

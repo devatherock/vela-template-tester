@@ -29,6 +29,7 @@ func validate(validationRequest ValidationRequest) (validationResponse Validatio
 
 	// Error response in case of a panic
 	validationResponse.Message = "Invalid template"
+	validationResponse.Error = "Unable to parse template"
 	defer handlePanic()
 
 	// Process template
@@ -51,6 +52,7 @@ func validate(validationRequest ValidationRequest) (validationResponse Validatio
 			validationResponse.Message = "template is not a valid yaml"
 		} else {
 			validationResponse.Message = "template is a valid yaml"
+			validationResponse.Error = ""
 		}
 		log.Debug("Output template: \n", buffer.String())
 	}
