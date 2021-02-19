@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,6 +37,10 @@ func TestRunAppWithIndividualEnvVariables(test *testing.T) {
 		setEnvironmentVariable(test, data.expectedOutputEnv, "templates/output_template.yml")
 
 		runApp([]string{"-x", "dummy"})
+
+		os.Unsetenv(data.inputFileEnv)
+		os.Unsetenv(data.variablesEnv)
+		os.Unsetenv(data.expectedOutputEnv)
 	}
 }
 
@@ -48,6 +53,8 @@ func TestRunAppWithTemplatesEnvVariable(test *testing.T) {
 	for _, data := range cases {
 		setEnvironmentVariable(test, data, `[{"input_file":"templates/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"templates/output_template.yml"}]`)
 		runApp([]string{"-x", "dummy"})
+
+		os.Unsetenv(data)
 	}
 }
 
