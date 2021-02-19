@@ -79,7 +79,7 @@ func run(context *cli.Context) error {
 
 		validationResponse := validate(validationRequest)
 		if validationResponse.Error != "" {
-			validationStatus = errors.New(fmt.Sprintf("Template '%s' is not valid. Error: %s", request.InputFile, validationResponse.Error))
+			validationStatus = errors.New(fmt.Sprintf("Template '%s' is invalid. Error: %s", request.InputFile, validationResponse.Error))
 		} else {
 			validationResult := verifyOutput(request, validationResponse)
 
@@ -132,7 +132,7 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 	}
 
 	if len(pluginValidationRequests) == 0 {
-		log.Warn("No templates specified")
+		log.Warn("No template specified")
 	}
 
 	return pluginValidationRequests

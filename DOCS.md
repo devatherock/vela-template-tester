@@ -17,7 +17,7 @@ steps:
     ruleset:
       branch: master
       event: [ pull_request, push ]
-    image: devatherock/vela-template-tester:0.2.0
+    image: devatherock/vela-template-tester:latest
     parameters:
       input_file: path/to/template.yml
       variables:
@@ -33,7 +33,7 @@ steps:
     ruleset:
       branch: master
       event: [ pull_request, push ]
-    image: devatherock/vela-template-tester:0.2.0
+    image: devatherock/vela-template-tester:latest
     parameters:
       input_file: path/to/template.yml
       variables:
@@ -50,7 +50,7 @@ steps:
     ruleset:
       branch: master
       event: [ pull_request, push ]
-    image: devatherock/vela-template-tester:0.2.0
+    image: devatherock/vela-template-tester:latest
     parameters:
       templates:
         - input_file: path/to/first_template.yml

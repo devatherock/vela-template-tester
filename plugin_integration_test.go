@@ -101,6 +101,35 @@ func TestMainWithEnvVariables(test *testing.T) {
 			0,
 			"Template 'templates/input_template.yml' is valid.",
 		},
+		{
+			map[string]string{},
+			0,
+			"No template specified",
+		},
+		{
+			map[string]string{
+				"PARAMETER_INPUT_FILE": "templates/input_parse_error_template.yml",
+				"PARAMETER_VARIABLES":  `{"notification_branch":"develop"}`,
+			},
+			1,
+			"Template 'templates/input_parse_error_template.yml' is invalid. Error: Unable to parse template",
+		},
+		{
+			map[string]string{
+				"PARAMETER_INPUT_FILE": "templates/input_invalid_template.yml",
+				"PARAMETER_VARIABLES":  `{"notification_branch":"develop"}`,
+			},
+			1,
+			"Template 'templates/input_invalid_template.yml' is invalid. Error: yaml: line 4: did not find expected ',' or ']'",
+		},
+		{
+			map[string]string{
+				"PARAMETER_INPUT_FILE":      "templates/input_template.yml",
+				"PARAMETER_EXPECTED_OUTPUT": "templates/output_template.yml",
+			},
+			1,
+			"Template 'templates/input_template.yml' is valid, but did not match expected output",
+		},
 	}
 
 	for _, data := range cases {
