@@ -1,10 +1,10 @@
-// +build integration
-
 package main
 
 import (
 	"io/ioutil"
+	"os"
 	"os/exec"
+	"testing"
 )
 
 // Executes a command and returns its output and exit code
@@ -18,4 +18,12 @@ func executeCommand(command *exec.Cmd) (int, string) {
 
 	output := string(stdOutBytes) + string(stdErrBytes)
 	return command.ProcessState.ExitCode(), output
+}
+
+func setEnvironmentVariable(test *testing.T, variable string, value string) {
+	os.Setenv(variable, value)
+
+	test.Cleanup(func() {
+		os.Unsetenv(variable)
+	})
 }

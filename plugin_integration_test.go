@@ -3,6 +3,7 @@
 package main
 
 import (
+	"os"
 	"os/exec"
 	"testing"
 
@@ -59,5 +60,60 @@ func TestMainWithCommandLineParameters(test *testing.T) {
 		exitCode, output := executeCommand(exec.Command("./docker/velatemplatetesterplugin", arguments...))
 		assert.Contains(test, output, data.expectedOutput)
 		assert.Equal(test, data.expectedExitCode, exitCode)
+	}
+}
+
+func TestMainWithEnvVariables(test *testing.T) {
+	cases := []struct {
+		parameters       map[string]string
+		expectedExitCode int
+		expectedOutput   string
+	}{
+		{
+			map[string]string{
+				"TEMPLATES": `[{"input_file":"templates/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"templates/output_template.yml"}]`,
+			},
+			0,
+			"Template 'templates/input_template.yml' is valid.",
+		},
+		{
+			map[string]string{
+				"PARAMETER_TEMPLATES": `[{"input_file":"templates/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"templates/output_template.yml"}]`,
+			},
+			0,
+			"Template 'templates/input_template.yml' is valid.",
+		},
+		{
+			map[string]string{
+				"INPUT_FILE":      "templates/input_template.yml",
+				"VARIABLES":       `{"notification_branch":"develop","notification_event":"push"}`,
+				"EXPECTED_OUTPUT": "templates/output_template.yml",
+			},
+			0,
+			"Template 'templates/input_template.yml' is valid.",
+		},
+		{
+			map[string]string{
+				"PARAMETER_INPUT_FILE":      "templates/input_template.yml",
+				"PARAMETER_VARIABLES":       `{"notification_branch":"develop","notification_event":"push"}`,
+				"PARAMETER_EXPECTED_OUTPUT": "templates/output_template.yml",
+			},
+			0,
+			"Template 'templates/input_template.yml' is valid.",
+		},
+	}
+
+	for _, data := range cases {
+		for key, value := range data.parameters {
+			setEnvironmentVariable(test, key, value)
+		}
+
+		exitCode, output := executeCommand(exec.Command("./docker/velatemplatetesterplugin"))
+		assert.Contains(test, output, data.expectedOutput)
+		assert.Equal(test, data.expectedExitCode, exitCode)
+
+		for key := range data.parameters {
+			os.Unsetenv(key)
+		}
 	}
 }
