@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - test: Basic tests so that coveralls and Sonar can be introduced
+- Accepted a list as `parameters` in the API along with `map`. This will make the API be able to expand any golang/sprig template, not just vela templates
 
 ## [0.2.0] - 2020-09-26
 ### Added
