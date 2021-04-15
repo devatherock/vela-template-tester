@@ -48,6 +48,47 @@ func TestExpandTemplate(test *testing.T) {
 	assert.Equal(test, expectedOutputMap, processedTemplateMap)
 }
 
+func TestExpandTemplateListParams(test *testing.T) {
+	validationRequest := ValidationRequest{}
+	input, _ := ioutil.ReadFile("templates/list_parameters_template.yml")
+	validationRequest.Template = string(input)
+
+	parameters := []interface{}{
+		map[string]string{
+			"title":   "Hello",
+			"content": "World",
+		},
+		map[string]string{
+			"title":   "Hi",
+			"content": "There",
+		},
+	}
+	validationRequest.Parameters = parameters
+
+	yamlStr, _ := yaml.Marshal(&validationRequest)
+	request, _ := http.NewRequest("POST", "/api/expandTemplate", bytes.NewBuffer(yamlStr))
+
+	response := httptest.NewRecorder()
+	handler := http.HandlerFunc(expandTemplate)
+	handler.ServeHTTP(response, request)
+
+	assert.Equal(test, 200, response.Code)
+
+	validationResponse := ValidationResponse{}
+	yaml.Unmarshal(response.Body.Bytes(), &validationResponse)
+	assert.Equal(test, "template is a valid yaml", validationResponse.Message)
+	assert.Equal(test, "", validationResponse.Error)
+
+	expectedOutput, _ := ioutil.ReadFile("templates/list_parameters_output.yml")
+	expectedOutputMap := make(map[interface{}]interface{})
+	yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
+
+	processedTemplateMap := make(map[interface{}]interface{})
+	yaml.Unmarshal([]byte(validationResponse.Template), &processedTemplateMap)
+
+	assert.Equal(test, expectedOutputMap, processedTemplateMap)
+}
+
 func TestCheckHealth(test *testing.T) {
 	request, _ := http.NewRequest("GET", "/api/health", nil)
 

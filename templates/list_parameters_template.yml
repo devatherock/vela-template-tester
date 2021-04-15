@@ -1,0 +1,4 @@
+notifications: |-
+  {{- range $index, $element := . }}
+    - *{{ $element.title -}}*, {{ $element.content -}}
+  {{ end }}

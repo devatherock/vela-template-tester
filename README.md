@@ -6,7 +6,7 @@
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=vela-template-tester&metric=ncloc)](https://sonarcloud.io/component_measures?id=vela-template-tester&metric=ncloc)
 [![Docker Image Size](https://img.shields.io/docker/image-size/devatherock/vela-template-tester.svg?sort=date)](https://hub.docker.com/r/devatherock/vela-template-tester/)
 # vela-template-tester
-API and vela plugin to test and validate [vela-ci templates](https://go-vela.github.io/docs/templates/overview/)
+API and vela plugin to test and validate [vela-ci templates](https://go-vela.github.io/docs/templates/overview/). The API can also be used to expand any golang/[sprig](https://github.com/Masterminds/sprig) template
 
 ## API Reference
 ### Key parameters:

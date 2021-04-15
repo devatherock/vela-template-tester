@@ -15,6 +15,13 @@ work_directory: &work_directory
 resource_class: &resource_class
   resource_class: small
   
+release_filter: &release_filter
+  filters:
+    branches:
+      only: non-existent-branch
+    tags:
+      only: /^v[0-9\.]+$/
+
 executors:
   docker-executor:
     docker:
@@ -181,7 +188,7 @@ jobs:
             
   notify:
     docker:
-      - image: devatherock/simple-slack:0.5.0
+      - image: devatherock/simple-slack:0.7.0
         auth:
           username: $DOCKER_USERNAME
           password: $DOCKER_PASSWORD
@@ -271,15 +278,12 @@ workflows:
       - release_api:
           context:
             - docker-credentials
-          filters:
-            branches:
-              only: non-existent-branch
-            tags:
-              only: /^v[0-9\.]+$/
+          <<: *release_filter
       - notify:
           context:
             - docker-credentials
             - slack-webhook
+          <<: *release_filter
           requires:
             - release_api
             
@@ -288,15 +292,12 @@ workflows:
       - release_plugin:
           context:
             - docker-credentials
-          filters:
-            branches:
-              only: non-existent-branch
-            tags:
-              only: /^v[0-9\.]+$/        
+          <<: *release_filter
       - notify:
           context:
             - docker-credentials
             - slack-webhook
+          <<: *release_filter
           requires:
             - release_plugin
             

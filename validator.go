@@ -20,7 +20,7 @@ type ValidationResponse struct {
 }
 
 type ValidationRequest struct {
-	Parameters map[string]interface{}
+	Parameters interface{}
 	Template   string
 }
 
