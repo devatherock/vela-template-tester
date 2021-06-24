@@ -4,6 +4,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"regexp"
 	"strings"
 	"text/template"
@@ -34,7 +35,7 @@ func validate(validationRequest ValidationRequest) (validationResponse Validatio
 
 	// Process template
 	buffer := new(bytes.Buffer)
-	parsedTemplate, err := template.New("test").Funcs(sprig.TxtFuncMap()).Parse(validationRequest.Template)
+	parsedTemplate, err := template.New("test").Funcs(VelaFuncMap()).Funcs(sprig.TxtFuncMap()).Parse(validationRequest.Template)
 	err = parsedTemplate.Execute(buffer, validationRequest.Parameters)
 
 	if err != nil {
@@ -64,4 +65,22 @@ func handlePanic() {
 	if error := recover(); error != nil {
 		log.Error("Recovering from panic: ", error)
 	}
+}
+
+// Function map for 'vela' function
+func VelaFuncMap() template.FuncMap {
+	return template.FuncMap(map[string]interface{}{
+		"vela": vela,
+	})
+}
+
+// Simulates the 'vela' function during validation, so as to not fail templates that use it
+func vela(variableName string) (envVariable string, err error) {
+	if variableName != "" {
+		envVariable = "${" + strings.ToUpper(variableName) + "}"
+	} else {
+		err = errors.New("Environment variable name cannot be empty in 'vela' function")
+	}
+
+	return
 }

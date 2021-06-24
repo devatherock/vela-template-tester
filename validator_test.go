@@ -36,6 +36,37 @@ func TestValidateSuccess(test *testing.T) {
 	assert.Equal(test, expectedOutputMap, processedTemplateMap)
 }
 
+func TestValidateVelaFunctionSuccess(test *testing.T) {
+	validationRequest := ValidationRequest{}
+
+	input, _ := ioutil.ReadFile("templates/input_vela_function_template.yml")
+	validationRequest.Template = string(input)
+
+	validationResponse := validate(validationRequest)
+	assert.Equal(test, "template is a valid yaml", validationResponse.Message)
+	assert.Equal(test, "", validationResponse.Error)
+
+	expectedOutput, _ := ioutil.ReadFile("templates/output_vela_function_template.yml")
+	expectedOutputMap := make(map[interface{}]interface{})
+	yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
+
+	processedTemplateMap := make(map[interface{}]interface{})
+	yaml.Unmarshal([]byte(validationResponse.Template), &processedTemplateMap)
+
+	assert.Equal(test, expectedOutputMap, processedTemplateMap)
+}
+
+func TestValidateVelaFunctionFailure(test *testing.T) {
+	validationRequest := ValidationRequest{}
+
+	input, _ := ioutil.ReadFile("templates/input_vela_fn_empty_variable_template.yml")
+	validationRequest.Template = string(input)
+
+	validationResponse := validate(validationRequest)
+	assert.Equal(test, "Invalid template", validationResponse.Message)
+	assert.Contains(test, validationResponse.Error, "Environment variable name cannot be empty in 'vela' function")
+}
+
 func TestValidateParseError(test *testing.T) {
 	validationRequest := ValidationRequest{}
 

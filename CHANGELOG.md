@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- [#25](https://github.com/devatherock/vela-template-tester/issues/25): Fixed failures in templates that used `vela` function
+
+## [0.3.0] - 2021-04-15
 ### Added
 - test: Basic tests so that coveralls and Sonar can be introduced
 - Accepted a list as `parameters` in the API along with `map`. This will make the API be able to expand any golang/sprig template, not just vela templates

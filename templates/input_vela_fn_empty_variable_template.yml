@@ -1,0 +1,9 @@
+metadata:
+  template: true
+
+steps:
+  - name: notify_success
+    ruleset:
+      branch: {{ vela "" }}
+    image: devatherock/simple-slack:0.2.0
+    secrets: [ slack_webhook ]
