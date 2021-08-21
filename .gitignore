@@ -5,3 +5,4 @@
 *.html
 docker/velatemplatetesterapi
 docker/velatemplatetesterplugin
+test-report.json

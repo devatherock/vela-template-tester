@@ -128,3 +128,21 @@ func TestValidateStarlarkTemplate(test *testing.T) {
 
 	assert.Equal(test, expectedOutputMap, processedTemplateMap)
 }
+
+func TestValidateStarlarkTemplateApiError(test *testing.T) {
+	setEnvironmentVariable(test, "PARAMETER_STARPG_HOST", "http://localhost:8080")
+	validationRequest := ValidationRequest{}
+
+	input, _ := ioutil.ReadFile("templates/input_starlark_template.py")
+	validationRequest.Template = string(input)
+	validationRequest.Type = "starlark"
+
+	parameters := map[string]interface{}{
+		"image": "go:1.14",
+	}
+	validationRequest.Parameters = parameters
+
+	validationResponse := validate(validationRequest)
+	assert.Equal(test, "Invalid template", validationResponse.Message)
+	assert.Contains(test, validationResponse.Error, "connection refused")
+}
