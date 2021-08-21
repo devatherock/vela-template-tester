@@ -112,5 +112,56 @@ template: |-
           {{.BuildMessage}}
 ```
 
+#### Sample Starlark template payload:
+
+```
+template: |-
+  def main(ctx):
+    return {
+        'version': '1',
+        'steps': [
+            {
+                'name': 'build',
+                'image': ctx["vars"]["image"],
+                'commands': [
+                    'go build',
+                    'go test',
+                ]
+            },
+        ],
+    }
+type: starlark    
+parameters:
+  image: "go:1.16"
+```
+
 ## Plugin Reference
 Please refer [docs](DOCS.md)
+
+## Starlark playground
+
+A vela Starlark template can also be tested using [Starlark playground](https://starpg.herokuapp.com). We need to specify the template along with the template variables specified within a `ctx` variable and a `print` method call to view the compiled template. Sample usage below:
+
+```
+def main(ctx):
+  return {
+    'version': '1',
+    'steps': [
+      {
+        'name': 'build',
+        'image': ctx["vars"]["image"],
+        'commands': [
+          'go build',
+          'go test',
+        ]
+      },
+    ],
+}
+
+ctx = {
+	"vars": {
+		"image": "alpine"
+	}
+}
+print(main(ctx))
+```

@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Support for Starlark based vela templates
+
+## [0.3.1] - 2021-06-23
 ### Changed
 - [#25](https://github.com/devatherock/vela-template-tester/issues/25): Fixed failures in templates that used `vela` function
 
