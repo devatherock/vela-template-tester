@@ -102,3 +102,29 @@ func TestValidateInvalidTemplate(test *testing.T) {
 	expectedOutput, _ := ioutil.ReadFile("templates/output_invalid_template.txt")
 	assert.Equal(test, string(expectedOutput), validationResponse.Template)
 }
+
+func TestValidateStarlarkTemplate(test *testing.T) {
+	validationRequest := ValidationRequest{}
+
+	input, _ := ioutil.ReadFile("templates/input_starlark_template.py")
+	validationRequest.Template = string(input)
+	validationRequest.Type = "starlark"
+
+	parameters := map[string]interface{}{
+		"image": "go:1.14",
+	}
+	validationRequest.Parameters = parameters
+
+	validationResponse := validate(validationRequest)
+	assert.Equal(test, "template is a valid yaml", validationResponse.Message)
+	assert.Equal(test, "", validationResponse.Error)
+
+	expectedOutput, _ := ioutil.ReadFile("templates/output_starlark_template.yml")
+	expectedOutputMap := make(map[interface{}]interface{})
+	yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
+
+	processedTemplateMap := make(map[interface{}]interface{})
+	yaml.Unmarshal([]byte(validationResponse.Template), &processedTemplateMap)
+
+	assert.Equal(test, expectedOutputMap, processedTemplateMap)
+}
