@@ -10,7 +10,7 @@ API and vela plugin to test and validate [vela-ci templates](https://go-vela.git
 
 ## API Reference
 ### Key parameters:
-- **Endpoint**: `https://vela-template-tester.herokuapp.com/api/expandTemplate`
+- **Endpoint**: `https://vela-template-tester.onrender.com/api/expandTemplate`
 - **Request Content-Type**: `application/x-yaml`
 - **Response Content-Type**: `application/x-yaml`
 
@@ -140,7 +140,7 @@ Please refer [docs](DOCS.md)
 
 ## Starlark playground
 
-A vela Starlark template can also be tested using [Starlark playground](https://starpg.herokuapp.com). We need to specify the template along with the template variables specified within a `ctx` variable and a `print` method call to view the compiled template. Sample usage below:
+A vela Starlark template can also be tested using [Starlark playground](https://starpg.onrender.com). We need to specify the template along with the template variables specified within a `ctx` variable and a `print` method call to view the compiled template. Sample usage below:
 
 ```
 def main(ctx):

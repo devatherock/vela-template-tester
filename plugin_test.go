@@ -1,3 +1,4 @@
+//go:build !api && !integration
 // +build !api,!integration
 
 package main

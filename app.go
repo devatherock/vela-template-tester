@@ -1,3 +1,4 @@
+//go:build !plugin && !integration
 // +build !plugin,!integration
 
 package main
@@ -50,7 +51,7 @@ func checkHealth(writer http.ResponseWriter, request *http.Request) {
 	writer.Write([]byte("UP"))
 }
 
-// Reads port from PORT environment variable available on heroku
+// Reads port from PORT environment variable
 func lookupPort() string {
 	port, ok := os.LookupEnv("PORT")
 	if !ok {
