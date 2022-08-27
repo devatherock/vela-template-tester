@@ -1,3 +1,4 @@
+//go:build !integration
 // +build !integration
 
 package main
@@ -133,7 +134,7 @@ func vela(variableName string) (envVariable string, err error) {
 func getStarlarkPlaygroundHost() (url string) {
 	url = os.Getenv("PARAMETER_STARPG_HOST")
 	if url == "" {
-		url = "https://starpg.herokuapp.com"
+		url = "https://starpg.onrender.com"
 	}
 
 	return

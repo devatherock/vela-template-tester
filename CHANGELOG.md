@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 ### Added
+- Deployment to render.com
+
+### Changed
+- Used `starpg` deployed on render.com
+
+### Removed
+- Deployment to heroku
+
+## [0.4.0] - 2021-08-21
+### Added
 - Support for Starlark based vela templates
 
 ## [0.3.1] - 2021-06-23

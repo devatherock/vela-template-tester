@@ -7,7 +7,6 @@ template_tester_image: &template_tester_image
     
 orbs:
   docker: circleci/docker@1.5.0
-  heroku: circleci/heroku@1.0.1
   
 work_directory: &work_directory
   working_directory: ~/vela-template-tester
@@ -25,7 +24,7 @@ release_filter: &release_filter
 executors:
   docker-executor:
     docker:
-      - image: circleci/golang:1.14
+      - image: cimg/go:1.14
         auth:
           username: $DOCKER_USERNAME
           password: $DOCKER_PASSWORD
@@ -137,24 +136,6 @@ jobs:
       - attach_workspace:
           at: ~/vela-template-tester
       - run: /bin/velatemplatetesterplugin
-
-  deploy:
-    executor: heroku/default
-    <<: *resource_class
-    <<: *work_directory
-    steps:
-      - checkout
-      - heroku/install
-      - setup_remote_docker
-      - attach_workspace:
-          at: ~/vela-template-tester
-      - run:
-          name: Build and push the docker image to registry.heroku.com
-          command: |
-            docker build -t registry.heroku.com/vela-template-tester/web -f docker/Api.Dockerfile docker
-            heroku container:login
-            docker push registry.heroku.com/vela-template-tester/web
-            heroku container:release -a vela-template-tester web
             
   release_api:
     executor: docker-executor
@@ -184,7 +165,16 @@ jobs:
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker pull devatherock/vela-template-tester:$DEV_TAG
           docker tag devatherock/vela-template-tester:$DEV_TAG devatherock/vela-template-tester:$TAG
-          docker push devatherock/vela-template-tester:$TAG          
+          docker push devatherock/vela-template-tester:$TAG
+          
+  deploy:
+    executor: docker-executor
+    <<: *resource_class
+    steps:
+      - run:
+          name: Trigger deployment to render.com
+          command: |
+            curl $RENDER_DEPLOY_HOOK
             
   notify:
     docker:
@@ -215,18 +205,12 @@ workflows:
             - docker-credentials
           requires:
             - build
-      - deploy:
-          context:
-            - docker-credentials
-            - heroku-credentials
-          requires:
-            - publish
       - notify:
           context:
             - docker-credentials
             - slack-webhook
           requires:
-            - deploy         
+            - publish         
             
   create_plugin:
     jobs:
@@ -279,13 +263,19 @@ workflows:
           context:
             - docker-credentials
           <<: *release_filter
+      - deploy:
+          context:
+            - docker-credentials
+          <<: *release_filter
+          requires:
+            - release_api
       - notify:
           context:
             - docker-credentials
             - slack-webhook
           <<: *release_filter
           requires:
-            - release_api
+            - deploy
             
   release_plugin:
     jobs:
