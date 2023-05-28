@@ -18,7 +18,7 @@ check:
 	go test -tags plugin
 coveralls:
 	go test -v -tags plugin -covermode=count -coverprofile=coverage.out -json > test-report.json
-	go get github.com/mattn/goveralls
+	go get github.com/mattn/goveralls@v0.0.9
 	${GOPATH}/bin/goveralls -coverprofile=coverage.out
 run-api:
 	go build -o docker/velatemplatetesterapi -tags api

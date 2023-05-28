@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Changed
 - Combined jobs in CI pipeline using parameters
+- Set goveralls version to `v0.0.9`, to fix build failure
 
 ### Removed
 - Unused `PORT` environment variable from render
