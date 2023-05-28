@@ -109,6 +109,25 @@ jobs:
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push devatherock/vela-template-tester-api:$TAG
           docker push devatherock/vela-template-tester-api:latest
+          
+  dockerhub_readme:
+    machine:
+      image: ubuntu-2204:2023.04.2
+    parameters:
+      docker_image:
+        type: string
+      image_type:
+        type: string
+    steps:
+      - checkout
+      - run: |
+          docker run -v $PWD:/workspace \
+              -e DOCKERHUB_USERNAME \
+              -e DOCKERHUB_PASSWORD \
+              -e DOCKERHUB_REPOSITORY='devatherock/<< parameters.docker_image >>' \
+              -e SHORT_DESCRIPTION='<< parameters.image_type >> to test and validate vela-ci templates' \
+              -e README_FILEPATH='/workspace/README.md' \
+              peterevans/dockerhub-description:3.4.1          
 
   test_plugin_single:
     <<: *template_tester_image
@@ -193,12 +212,21 @@ workflows:
             - docker-credentials
           requires:
             - build
+      - dockerhub_readme:
+          name: dockerhub_readme_api
+          context:
+            - docker-credentials
+            - dockerhub-readme-credentials
+          docker_image: 'vela-template-tester-api'
+          image_type: 'API'
+          requires:
+            - publish
       - notify:
           context:
             - docker-credentials
             - slack-webhook
           requires:
-            - publish         
+            - dockerhub_readme_api         
             
   create_plugin:
     jobs:
@@ -227,16 +255,25 @@ workflows:
           docker-username: DOCKER_USERNAME
           dockerfile: docker/Plugin.Dockerfile
           docker-context: docker
+      - dockerhub_readme:
+          name: dockerhub_readme_plugin
+          context:
+            - docker-credentials
+            - dockerhub-readme-credentials
+          docker_image: 'vela-template-tester'
+          image_type: 'Plugin'
+          requires:
+            - publish_plugin
       - test_plugin_single:
           context:
             - docker-credentials
           requires:
-            - publish_plugin
+            - dockerhub_readme_plugin
       - test_plugin_list:
           context:
             - docker-credentials
           requires:
-            - publish_plugin
+            - dockerhub_readme_plugin
       - notify:
           context:
             - docker-credentials
