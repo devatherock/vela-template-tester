@@ -4,6 +4,7 @@
 ### Changed
 - Combined jobs in CI pipeline using parameters
 - Set goveralls version to `v0.0.9`, to fix build failure
+- [#42](https://github.com/devatherock/vela-template-tester/issues/42): Merged contents of `DOCS.md` into `README.md`
 
 ### Removed
 - Unused `PORT` environment variable from render
