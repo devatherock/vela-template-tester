@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Combined jobs in CI pipeline using parameters
+
 ### Removed
 - Unused `PORT` environment variable from render
 

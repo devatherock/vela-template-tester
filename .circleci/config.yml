@@ -137,8 +137,11 @@ jobs:
           at: ~/vela-template-tester
       - run: /bin/velatemplatetesterplugin
             
-  release_api:
+  release:
     executor: docker-executor
+    parameters:
+      docker_image:
+        type: string
     steps:
       - checkout
       - setup_remote_docker
@@ -148,24 +151,9 @@ jobs:
           TAG=${CIRCLE_TAG#v}
           DEV_TAG=${CIRCLE_SHA1:0:8}
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-          docker pull devatherock/vela-template-tester-api:$DEV_TAG
-          docker tag devatherock/vela-template-tester-api:$DEV_TAG devatherock/vela-template-tester-api:$TAG
-          docker push devatherock/vela-template-tester-api:$TAG
-          
-  release_plugin:
-    executor: docker-executor
-    steps:
-      - checkout
-      - setup_remote_docker
-      - attach_workspace:
-          at: ~/vela-template-tester
-      - run: |
-          TAG=${CIRCLE_TAG#v}
-          DEV_TAG=${CIRCLE_SHA1:0:8}
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-          docker pull devatherock/vela-template-tester:$DEV_TAG
-          docker tag devatherock/vela-template-tester:$DEV_TAG devatherock/vela-template-tester:$TAG
-          docker push devatherock/vela-template-tester:$TAG
+          docker pull devatherock/<< parameters.docker_image >>:$DEV_TAG
+          docker tag devatherock/<< parameters.docker_image >>:$DEV_TAG devatherock/<< parameters.docker_image >>:$TAG
+          docker push devatherock/<< parameters.docker_image >>:$TAG
           
   deploy:
     executor: docker-executor
@@ -259,9 +247,11 @@ workflows:
             
   release_api:
     jobs:
-      - release_api:
+      - release:
+          name: release_api
           context:
             - docker-credentials
+          docker_image: vela-template-tester-api
           <<: *release_filter
       - deploy:
           context:
@@ -279,9 +269,11 @@ workflows:
             
   release_plugin:
     jobs:
-      - release_plugin:
+      - release:
+          name: release_plugin
           context:
             - docker-credentials
+          docker_image: vela-template-tester
           <<: *release_filter
       - notify:
           context:
