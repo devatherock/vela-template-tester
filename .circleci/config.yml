@@ -106,13 +106,14 @@ jobs:
           TAG=${CIRCLE_SHA1:0:8}
           docker build -t devatherock/vela-template-tester-api:$TAG -f docker/Api.Dockerfile docker
           docker tag devatherock/vela-template-tester-api:$TAG devatherock/vela-template-tester-api:latest
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
           docker push devatherock/vela-template-tester-api:$TAG
           docker push devatherock/vela-template-tester-api:latest
           
   dockerhub_readme:
     machine:
       image: ubuntu-2204:2023.04.2
+      resource_class: medium
     parameters:
       docker_image:
         type: string
@@ -169,7 +170,7 @@ jobs:
       - run: |
           TAG=${CIRCLE_TAG#v}
           DEV_TAG=${CIRCLE_SHA1:0:8}
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
           docker pull devatherock/<< parameters.docker_image >>:$DEV_TAG
           docker tag devatherock/<< parameters.docker_image >>:$DEV_TAG devatherock/<< parameters.docker_image >>:$TAG
           docker push devatherock/<< parameters.docker_image >>:$TAG
