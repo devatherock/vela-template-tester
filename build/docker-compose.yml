@@ -1,0 +1,7 @@
+services:
+
+  vela-template-tester-api:
+    image: devatherock/vela-template-tester-api:${DOCKER_TAG:-latest}
+    network_mode: "host"
+    environment:
+      - PORT=8082

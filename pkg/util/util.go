@@ -1,7 +1,4 @@
-//go:build !integration
-// +build !integration
-
-package main
+package util
 
 import (
 	"os"
@@ -9,12 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Initializes log level
-func init() {
-	initLogLevel()
-}
-
-func initLogLevel() {
+func InitLogLevel() {
 	level, ok := os.LookupEnv("PARAMETER_LOG_LEVEL")
 
 	// LOG_LEVEL not set, default to info
@@ -33,7 +25,7 @@ func initLogLevel() {
 }
 
 // Logs the error and exits the application
-func handleError(err error) {
+func HandleError(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,16 +1,20 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- [#13](https://github.com/devatherock/vela-template-tester/issues/13): Functional tests
+
 ### Changed
 - Combined jobs in CI pipeline using parameters
 - Set goveralls version to `v0.0.9`, to fix build failure
 - [#42](https://github.com/devatherock/vela-template-tester/issues/42): Merged contents of `DOCS.md` into `README.md`
 - [#40](https://github.com/devatherock/vela-template-tester/issues/40): Updated dockerhub readme in CI pipeline
+- Restructured the project as per [golang-standards](https://github.com/golang-standards/project-layout)
 
 ### Removed
 - Unused `PORT` environment variable from render
 
-## [0.5.0] - 2021-08-27
+## [0.5.0] - 2022-08-27
 ### Added
 - Deployment to render.com
 

@@ -1,7 +1,4 @@
-//go:build !integration
-// +build !integration
-
-package main
+package validator
 
 import (
 	"bytes"
@@ -34,7 +31,7 @@ type ValidationRequest struct {
 
 var client = &http.Client{}
 
-func validate(validationRequest ValidationRequest) (validationResponse ValidationResponse) {
+func Validate(validationRequest ValidationRequest) (validationResponse ValidationResponse) {
 	validationResponse = ValidationResponse{}
 
 	// Error response in case of a panic

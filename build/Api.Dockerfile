@@ -1,5 +1,5 @@
 FROM alpine
 
-COPY velatemplatetesterapi /bin/velatemplatetesterapi
+COPY bin/api /bin/velatemplatetesterapi
 
 ENTRYPOINT ["/bin/velatemplatetesterapi"]

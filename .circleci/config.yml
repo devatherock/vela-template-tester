@@ -30,6 +30,11 @@ executors:
           password: $DOCKER_PASSWORD
     <<: *resource_class
     <<: *work_directory
+  machine-executor:
+    machine:
+      image: ubuntu-2204:2023.04.2
+    resource_class: medium
+    <<: *work_directory
 
 version: 2.1
 jobs:
@@ -54,25 +59,9 @@ jobs:
           keys:
             - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
-      - run: make build-api
-      - persist_to_workspace:
-          root: ~/vela-template-tester
-          paths:
-            - docker/velatemplatetesterapi
-  build_plugin:
-    executor: docker-executor
-    environment:
-      CGO_ENABLED: 0
-      GOOS: linux
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-pkg-cache-{{ checksum "go.mod" }}
-            - v1-pkg-cache
       - run: |
           make coveralls
-          make build-plugin
+          make build-all
       - save_cache:
           paths:
             - "/go/pkg"
@@ -80,7 +69,7 @@ jobs:
       - persist_to_workspace:
           root: ~/vela-template-tester
           paths:
-            - docker/velatemplatetesterplugin
+            - bin
             
   integration_test:
     executor: docker-executor
@@ -104,16 +93,14 @@ jobs:
           at: ~/vela-template-tester
       - run: |
           TAG=${CIRCLE_SHA1:0:8}
-          docker build -t devatherock/vela-template-tester-api:$TAG -f docker/Api.Dockerfile docker
+          docker build -t devatherock/vela-template-tester-api:$TAG -f build/Api.Dockerfile .
           docker tag devatherock/vela-template-tester-api:$TAG devatherock/vela-template-tester-api:latest
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
           docker push devatherock/vela-template-tester-api:$TAG
           docker push devatherock/vela-template-tester-api:latest
           
   dockerhub_readme:
-    machine:
-      image: ubuntu-2204:2023.04.2
-      resource_class: medium
+    executor: machine-executor
     parameters:
       docker_image:
         type: string
@@ -128,7 +115,7 @@ jobs:
               -e DOCKERHUB_REPOSITORY='devatherock/<< parameters.docker_image >>' \
               -e SHORT_DESCRIPTION='<< parameters.image_type >> to test and validate vela-ci templates' \
               -e README_FILEPATH='/workspace/README.md' \
-              peterevans/dockerhub-description:3.4.1          
+              peterevans/dockerhub-description:3.4.1
 
   test_plugin_single:
     <<: *template_tester_image
@@ -156,6 +143,16 @@ jobs:
       - attach_workspace:
           at: ~/vela-template-tester
       - run: /bin/velatemplatetesterplugin
+
+  functional_test:
+    executor: machine-executor
+    parameters:
+      command_args:
+        type: string
+    steps:
+      - checkout
+      - run: |
+          make << parameters.command_args >>
             
   release:
     executor: docker-executor
@@ -208,40 +205,16 @@ workflows:
           filters:
             branches:
               only: master
-      - publish:
-          context:
-            - docker-credentials
-          requires:
-            - build
-      - dockerhub_readme:
-          name: dockerhub_readme_api
-          context:
-            - docker-credentials
-            - dockerhub-readme-credentials
-          docker_image: 'vela-template-tester-api'
-          image_type: 'API'
-          requires:
-            - publish
-      - notify:
-          context:
-            - docker-credentials
-            - slack-webhook
-          requires:
-            - dockerhub_readme_api         
-            
-  create_plugin:
-    jobs:
-      - build_plugin:
-          context:
-            - docker-credentials
-          filters:
-            branches:
-              only: master
       - integration_test:
           context:
             - docker-credentials
           requires:
-            - build_plugin
+            - build
+      - publish:
+          context:
+            - docker-credentials
+          requires:
+            - integration_test
       - docker/publish:
           name: publish_plugin
           executor: docker-executor
@@ -254,8 +227,16 @@ workflows:
           tag: "${CIRCLE_SHA1:0:8},latest"
           use-remote-docker: true
           docker-username: DOCKER_USERNAME
-          dockerfile: docker/Plugin.Dockerfile
-          docker-context: docker
+          dockerfile: build/Plugin.Dockerfile
+      - dockerhub_readme:
+          name: dockerhub_readme_api
+          context:
+            - docker-credentials
+            - dockerhub-readme-credentials
+          docker_image: 'vela-template-tester-api'
+          image_type: 'API'
+          requires:
+            - publish
       - dockerhub_readme:
           name: dockerhub_readme_plugin
           context:
@@ -275,14 +256,29 @@ workflows:
             - docker-credentials
           requires:
             - dockerhub_readme_plugin
+      - functional_test:
+          name: functional_test_api
+          context:
+            - docker-credentials
+          command_args: 'functional-test-api'
+          requires:
+            - dockerhub_readme_api
+      - functional_test:
+          name: functional_test_plugin
+          context:
+            - docker-credentials
+          command_args: 'functional-test-plugin'
+          requires:
+            - test_plugin_single
+            - test_plugin_list
       - notify:
           context:
             - docker-credentials
             - slack-webhook
           requires:
-            - test_plugin_single
-            - test_plugin_list
-            
+            - functional_test_api
+            - functional_test_plugin
+
   release_api:
     jobs:
       - release:
