@@ -4,8 +4,7 @@ clean:
 	rm -f coverage.out
 	rm -f coverage.html
 	rm -f test-report.json
-	rm -f bin/app
-	rm -f bin/plugin
+	rm -rf bin
 	go clean -testcache
 check:
 	gofmt -l -w -s .
@@ -27,6 +26,7 @@ build-all:
 	go vet ./...
 	go mod tidy
 	go test -v ./... -tags test
+	mkdir -p bin
 	go build -o bin/ ./...
 integration-test:
 	go test -v ./... -tags integration

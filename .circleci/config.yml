@@ -60,16 +60,7 @@ jobs:
             - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
       - run: |
-          make coveralls
           make build-all
-      - save_cache:
-          paths:
-            - "/go/pkg"
-          key: v1-pkg-cache-{{ checksum "go.mod" }}
-      - persist_to_workspace:
-          root: ~/vela-template-tester
-          paths:
-            - bin
             
   integration_test:
     executor: docker-executor
@@ -319,7 +310,7 @@ workflows:
             
   pr_check:
     jobs:
-      - test:
+      - build:
           context:
             - docker-credentials
           filters:
