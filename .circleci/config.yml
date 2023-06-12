@@ -122,9 +122,9 @@ jobs:
     <<: *resource_class
     <<: *work_directory
     environment:
-      PARAMETER_INPUT_FILE: "templates/input_template.yml"
+      PARAMETER_INPUT_FILE: "test/testdata/input_template.yml"
       PARAMETER_VARIABLES: '{"notification_branch":"develop","notification_event":"push"}'
-      PARAMETER_EXPECTED_OUTPUT: "templates/output_template.yml"
+      PARAMETER_EXPECTED_OUTPUT: "test/testdata/output_template.yml"
       PARAMETER_LOG_LEVEL: debug
     steps:
       - checkout
@@ -137,7 +137,7 @@ jobs:
     <<: *resource_class
     <<: *work_directory
     environment:
-      PARAMETER_TEMPLATES: '[{"input_file":"templates/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"templates/output_template.yml"}]'
+      PARAMETER_TEMPLATES: '[{"input_file":"test/testdata/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"test/testdata/output_template.yml"}]'
     steps:
       - checkout
       - attach_workspace:
