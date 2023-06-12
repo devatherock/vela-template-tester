@@ -1,34 +1,41 @@
+docker_tag=latest
+
 clean:
-	rm coverage.out || true
-	rm coverage.html || true
-	rm test-report.json || true
-	rm docker/velatemplatetesterapi || true
-	rm docker/velatemplatetesterplugin || true
-test-api:
-	go test -v -tags api -race -coverprofile=coverage.out
-	go tool cover -html=coverage.out -o coverage.html
-test-plugin:
-	go test -v -tags plugin -race -coverprofile=coverage.out
-	go tool cover -html=coverage.out -o coverage.html
+	rm -f coverage.out
+	rm -f coverage.html
+	rm -f test-report.json
+	rm -f bin/app
+	rm -f bin/plugin
+	go clean -testcache
 check:
 	gofmt -l -w -s .
-	go vet -tags api
-	go vet -tags plugin
-	go test -tags api
-	go test -tags plugin
+	go vet ./...
+	go test -v ./... -tags test -race -coverprofile=coverage.out
+	go tool cover -html=coverage.out -o coverage.html
 coveralls:
-	go test -v -tags plugin -covermode=count -coverprofile=coverage.out -json > test-report.json
+	go test -v ./... -tags test -covermode=count -coverprofile=coverage.out -json > test-report.json
 	go get github.com/mattn/goveralls@v0.0.9
 	${GOPATH}/bin/goveralls -coverprofile=coverage.out
 run-api:
-	go build -o docker/velatemplatetesterapi -tags api
-	./docker/velatemplatetesterapi
+	go build -o bin/ ./...
+	./bin/app
 run-plugin:
-	go build -o docker/velatemplatetesterplugin -tags plugin
-	./docker/velatemplatetesterplugin	
-build-api:
-	go build -o docker/velatemplatetesterapi -tags api
-build-plugin:
-	go build -o docker/velatemplatetesterplugin -tags plugin
+	go build -o bin/ ./...
+	./bin/plugin	
+build-all:
+	gofmt -l -w -s .
+	go vet ./...
+	go mod tidy
+	go test -v ./... -tags test
+	go build -o bin/ ./...
 integration-test:
-	go test -v -tags integration
+	go test -v ./... -tags integration
+functional-test-plugin:
+	docker pull devatherock/vela-template-tester:latest
+	go test -v ./... -tags functional
+functional-test-api:
+	docker pull devatherock/vela-template-tester-api:$(docker_tag)
+	DOCKER_TAG=$(docker_tag) docker-compose -f build/docker-compose.yml up -d
+	sleep 1
+	go test -v ./... -tags api
+	docker-compose -f build/docker-compose.yml down

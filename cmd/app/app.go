@@ -8,9 +8,16 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/devatherock/vela-template-tester/pkg/util"
+	"github.com/devatherock/vela-template-tester/pkg/validator"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
+
+// Initializes log level
+func init() {
+	util.InitLogLevel()
+}
 
 func main() {
 	http.HandleFunc("/api/expandTemplate", expandTemplate)
@@ -31,11 +38,11 @@ func expandTemplate(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	// Parse request
-	validationRequest := ValidationRequest{}
+	validationRequest := validator.ValidationRequest{}
 	err = yaml.Unmarshal(requestBody, &validationRequest)
 
 	// Validate template
-	validationResponse := validate(validationRequest)
+	validationResponse := validator.Validate(validationRequest)
 
 	// Write response
 	responseBody, err := yaml.Marshal(&validationResponse)

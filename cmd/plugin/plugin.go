@@ -1,6 +1,3 @@
-//go:build !api && !integration
-// +build !api,!integration
-
 package main
 
 import (
@@ -11,6 +8,8 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/devatherock/vela-template-tester/pkg/util"
+	"github.com/devatherock/vela-template-tester/pkg/validator"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
@@ -22,12 +21,19 @@ type PluginValidationRequest struct {
 	ExpectedOutput string                 `json:"expected_output,omitempty"`
 }
 
+var exit func(code int) = os.Exit
+
+// Initializes log level
+func init() {
+	util.InitLogLevel()
+}
+
 // Plugin entry point
 func main() {
 	runApp(os.Args)
 }
 
-// Initializes and runs the app
+// Reads the plugin parameters and runs it
 func runApp(args []string) {
 	app := cli.NewApp()
 	app.Name = "vela template tester plugin"
@@ -60,16 +66,17 @@ func runApp(args []string) {
 	}
 
 	err := app.Run(args)
-	handleError(err)
+	util.HandleError(err)
 }
 
 // Tests the supplied templates using the validator
 func run(context *cli.Context) error {
 	pluginValidationRequests := readInputParameters(context)
-	var validationStatus error
+	var validationFailure bool
+	var validationStatus error // For easier testing
 
 	for _, request := range pluginValidationRequests {
-		validationRequest := ValidationRequest{}
+		validationRequest := validator.ValidationRequest{}
 
 		content, error := ioutil.ReadFile(request.InputFile)
 		if error != nil {
@@ -78,18 +85,30 @@ func run(context *cli.Context) error {
 		validationRequest.Template = string(content)
 		validationRequest.Parameters = request.Variables
 
-		validationResponse := validate(validationRequest)
+		validationResponse := validator.Validate(validationRequest)
 		if validationResponse.Error != "" {
-			validationStatus = errors.New(fmt.Sprintf("Template '%s' is invalid. Error: %s", request.InputFile, validationResponse.Error))
+			message := fmt.Sprintf("Template '%s' is invalid. Error: %s", request.InputFile, validationResponse.Error)
+			validationStatus = errors.New(message)
+
+			log.Error(message)
+			validationFailure = true
 		} else {
 			validationResult := verifyOutput(request, validationResponse)
 
 			if validationResult {
 				log.Printf("Template '%s' is valid.", request.InputFile)
 			} else {
-				validationStatus = errors.New(fmt.Sprintf("Template '%s' is valid, but did not match expected output", request.InputFile))
+				message := fmt.Sprintf("Template '%s' is valid, but did not match expected output", request.InputFile)
+				validationStatus = errors.New(message)
+
+				log.Error(message)
+				validationFailure = true
 			}
 		}
+	}
+
+	if validationFailure {
+		exit(1)
 	}
 
 	return validationStatus
@@ -110,7 +129,7 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 		if variables != "" {
 			parsedVariables := make(map[string]interface{})
 			error := json.Unmarshal([]byte(variables), &parsedVariables)
-			handleError(error)
+			util.HandleError(error)
 
 			pluginValidationRequest.Variables = parsedVariables
 		}
@@ -127,31 +146,32 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 	if templates != "" {
 		suppliedValidationRequests := []PluginValidationRequest{}
 		error := json.Unmarshal([]byte(templates), &suppliedValidationRequests)
-		handleError(error)
+		util.HandleError(error)
 
 		pluginValidationRequests = append(pluginValidationRequests, suppliedValidationRequests...)
 	}
 
 	if len(pluginValidationRequests) == 0 {
 		log.Warn("No template specified")
+		exit(0)
 	}
 
 	return pluginValidationRequests
 }
 
 // Verifies if the processed template matches the expected output
-func verifyOutput(request PluginValidationRequest, validationResponse ValidationResponse) bool {
+func verifyOutput(request PluginValidationRequest, validationResponse validator.ValidationResponse) bool {
 	if request.ExpectedOutput != "" {
 		expectedOutput, error := ioutil.ReadFile(request.ExpectedOutput)
-		handleError(error)
+		util.HandleError(error)
 
 		expectedOutputMap := make(map[interface{}]interface{})
 		error = yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
-		handleError(error)
+		util.HandleError(error)
 
 		processedTemplateMap := make(map[interface{}]interface{})
 		error = yaml.Unmarshal([]byte(validationResponse.Template), &processedTemplateMap)
-		handleError(error)
+		util.HandleError(error)
 
 		return reflect.DeepEqual(expectedOutputMap, processedTemplateMap)
 	}

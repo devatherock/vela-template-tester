@@ -1,12 +1,13 @@
-//go:build !integration
-// +build !integration
+//go:build test
+// +build test
 
-package main
+package validator
 
 import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/devatherock/vela-template-tester/test/helper"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
@@ -14,7 +15,7 @@ import (
 func TestValidateSuccess(test *testing.T) {
 	validationRequest := ValidationRequest{}
 
-	input, _ := ioutil.ReadFile("templates/input_template.yml")
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_template.yml"))
 	validationRequest.Template = string(input)
 
 	parameters := map[string]interface{}{
@@ -23,11 +24,11 @@ func TestValidateSuccess(test *testing.T) {
 	}
 	validationRequest.Parameters = parameters
 
-	validationResponse := validate(validationRequest)
+	validationResponse := Validate(validationRequest)
 	assert.Equal(test, "template is a valid yaml", validationResponse.Message)
 	assert.Equal(test, "", validationResponse.Error)
 
-	expectedOutput, _ := ioutil.ReadFile("templates/output_template.yml")
+	expectedOutput, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/output_template.yml"))
 	expectedOutputMap := make(map[interface{}]interface{})
 	yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
 
@@ -40,14 +41,14 @@ func TestValidateSuccess(test *testing.T) {
 func TestValidateVelaFunctionSuccess(test *testing.T) {
 	validationRequest := ValidationRequest{}
 
-	input, _ := ioutil.ReadFile("templates/input_vela_function_template.yml")
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_vela_function_template.yml"))
 	validationRequest.Template = string(input)
 
-	validationResponse := validate(validationRequest)
+	validationResponse := Validate(validationRequest)
 	assert.Equal(test, "template is a valid yaml", validationResponse.Message)
 	assert.Equal(test, "", validationResponse.Error)
 
-	expectedOutput, _ := ioutil.ReadFile("templates/output_vela_function_template.yml")
+	expectedOutput, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/output_vela_function_template.yml"))
 	expectedOutputMap := make(map[interface{}]interface{})
 	yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
 
@@ -60,10 +61,10 @@ func TestValidateVelaFunctionSuccess(test *testing.T) {
 func TestValidateVelaFunctionFailure(test *testing.T) {
 	validationRequest := ValidationRequest{}
 
-	input, _ := ioutil.ReadFile("templates/input_vela_fn_empty_variable_template.yml")
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_vela_fn_empty_variable_template.yml"))
 	validationRequest.Template = string(input)
 
-	validationResponse := validate(validationRequest)
+	validationResponse := Validate(validationRequest)
 	assert.Equal(test, "Invalid template", validationResponse.Message)
 	assert.Contains(test, validationResponse.Error, "Environment variable name cannot be empty in 'vela' function")
 }
@@ -71,7 +72,7 @@ func TestValidateVelaFunctionFailure(test *testing.T) {
 func TestValidateParseError(test *testing.T) {
 	validationRequest := ValidationRequest{}
 
-	input, _ := ioutil.ReadFile("templates/input_parse_error_template.yml")
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_parse_error_template.yml"))
 	validationRequest.Template = string(input)
 
 	parameters := map[string]interface{}{
@@ -79,7 +80,7 @@ func TestValidateParseError(test *testing.T) {
 	}
 	validationRequest.Parameters = parameters
 
-	validationResponse := validate(validationRequest)
+	validationResponse := Validate(validationRequest)
 	assert.Equal(test, "Invalid template", validationResponse.Message)
 	assert.Equal(test, "Unable to parse template", validationResponse.Error)
 	assert.Equal(test, "", validationResponse.Template)
@@ -88,7 +89,7 @@ func TestValidateParseError(test *testing.T) {
 func TestValidateInvalidTemplate(test *testing.T) {
 	validationRequest := ValidationRequest{}
 
-	input, _ := ioutil.ReadFile("templates/input_invalid_template.yml")
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_invalid_template.yml"))
 	validationRequest.Template = string(input)
 
 	parameters := map[string]interface{}{
@@ -96,18 +97,18 @@ func TestValidateInvalidTemplate(test *testing.T) {
 	}
 	validationRequest.Parameters = parameters
 
-	validationResponse := validate(validationRequest)
+	validationResponse := Validate(validationRequest)
 	assert.Equal(test, "template is not a valid yaml", validationResponse.Message)
 	assert.Equal(test, "yaml: line 4: did not find expected ',' or ']'", validationResponse.Error)
 
-	expectedOutput, _ := ioutil.ReadFile("templates/output_invalid_template.txt")
+	expectedOutput, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/output_invalid_template.txt"))
 	assert.Equal(test, string(expectedOutput), validationResponse.Template)
 }
 
 func TestValidateStarlarkTemplate(test *testing.T) {
 	validationRequest := ValidationRequest{}
 
-	input, _ := ioutil.ReadFile("templates/input_starlark_template.py")
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_starlark_template.py"))
 	validationRequest.Template = string(input)
 	validationRequest.Type = "starlark"
 
@@ -116,11 +117,11 @@ func TestValidateStarlarkTemplate(test *testing.T) {
 	}
 	validationRequest.Parameters = parameters
 
-	validationResponse := validate(validationRequest)
+	validationResponse := Validate(validationRequest)
 	assert.Equal(test, "template is a valid yaml", validationResponse.Message)
 	assert.Equal(test, "", validationResponse.Error)
 
-	expectedOutput, _ := ioutil.ReadFile("templates/output_starlark_template.yml")
+	expectedOutput, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/output_starlark_template.yml"))
 	expectedOutputMap := make(map[interface{}]interface{})
 	yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
 
@@ -131,10 +132,10 @@ func TestValidateStarlarkTemplate(test *testing.T) {
 }
 
 func TestValidateStarlarkTemplateApiError(test *testing.T) {
-	setEnvironmentVariable(test, "PARAMETER_STARPG_HOST", "http://localhost:8080")
+	helper.SetEnvironmentVariable(test, "PARAMETER_STARPG_HOST", "http://localhost:8080")
 	validationRequest := ValidationRequest{}
 
-	input, _ := ioutil.ReadFile("templates/input_starlark_template.py")
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_starlark_template.py"))
 	validationRequest.Template = string(input)
 	validationRequest.Type = "starlark"
 
@@ -143,7 +144,7 @@ func TestValidateStarlarkTemplateApiError(test *testing.T) {
 	}
 	validationRequest.Parameters = parameters
 
-	validationResponse := validate(validationRequest)
+	validationResponse := Validate(validationRequest)
 	assert.Equal(test, "Invalid template", validationResponse.Message)
 	assert.Contains(test, validationResponse.Error, "connection refused")
 }

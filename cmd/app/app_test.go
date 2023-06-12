@@ -1,5 +1,5 @@
-//go:build !plugin && !integration
-// +build !plugin,!integration
+//go:build test
+// +build test
 
 package main
 
@@ -10,13 +10,15 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/devatherock/vela-template-tester/pkg/validator"
+	"github.com/devatherock/vela-template-tester/test/helper"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
 
 func TestExpandTemplate(test *testing.T) {
-	validationRequest := ValidationRequest{}
-	input, _ := ioutil.ReadFile("templates/input_template.yml")
+	validationRequest := validator.ValidationRequest{}
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_template.yml"))
 	validationRequest.Template = string(input)
 
 	parameters := map[string]interface{}{
@@ -34,12 +36,12 @@ func TestExpandTemplate(test *testing.T) {
 
 	assert.Equal(test, 200, response.Code)
 
-	validationResponse := ValidationResponse{}
+	validationResponse := validator.ValidationResponse{}
 	yaml.Unmarshal(response.Body.Bytes(), &validationResponse)
 	assert.Equal(test, "template is a valid yaml", validationResponse.Message)
 	assert.Equal(test, "", validationResponse.Error)
 
-	expectedOutput, _ := ioutil.ReadFile("templates/output_template.yml")
+	expectedOutput, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/output_template.yml"))
 	expectedOutputMap := make(map[interface{}]interface{})
 	yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
 
@@ -50,8 +52,8 @@ func TestExpandTemplate(test *testing.T) {
 }
 
 func TestExpandTemplateListParams(test *testing.T) {
-	validationRequest := ValidationRequest{}
-	input, _ := ioutil.ReadFile("templates/list_parameters_template.yml")
+	validationRequest := validator.ValidationRequest{}
+	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/list_parameters_template.yml"))
 	validationRequest.Template = string(input)
 
 	parameters := []interface{}{
@@ -75,12 +77,12 @@ func TestExpandTemplateListParams(test *testing.T) {
 
 	assert.Equal(test, 200, response.Code)
 
-	validationResponse := ValidationResponse{}
+	validationResponse := validator.ValidationResponse{}
 	yaml.Unmarshal(response.Body.Bytes(), &validationResponse)
 	assert.Equal(test, "template is a valid yaml", validationResponse.Message)
 	assert.Equal(test, "", validationResponse.Error)
 
-	expectedOutput, _ := ioutil.ReadFile("templates/list_parameters_output.yml")
+	expectedOutput, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/list_parameters_output.yml"))
 	expectedOutputMap := make(map[interface{}]interface{})
 	yaml.Unmarshal([]byte(expectedOutput), &expectedOutputMap)
 
@@ -102,7 +104,7 @@ func TestCheckHealth(test *testing.T) {
 }
 
 func TestLookupPortEnvVariablePresent(test *testing.T) {
-	setEnvironmentVariable(test, "PORT", "8081")
+	helper.SetEnvironmentVariable(test, "PORT", "8081")
 
 	assert.Equal(test, "8081", lookupPort())
 }
