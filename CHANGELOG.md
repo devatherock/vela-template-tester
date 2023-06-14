@@ -10,6 +10,7 @@
 - [#42](https://github.com/devatherock/vela-template-tester/issues/42): Merged contents of `DOCS.md` into `README.md`
 - [#40](https://github.com/devatherock/vela-template-tester/issues/40): Updated dockerhub readme in CI pipeline
 - Restructured the project as per [golang-standards](https://github.com/golang-standards/project-layout)
+- [#31](https://github.com/devatherock/vela-template-tester/issues/31): Upgraded `goutils` to `1.1.1`
 
 ### Removed
 - Unused `PORT` environment variable from render
