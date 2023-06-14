@@ -68,27 +68,43 @@ func TestRunAppWithIndividualParameters(test *testing.T) {
 	exitCode := captureExitCode(test)
 
 	cases := []struct {
-		inputFileParam      string
-		variablesParam      string
-		expectedOutputParam string
+		inputFileParam           string
+		variablesParam           string
+		expectedOutputParam      string
+		templateTypeParam        string
+		inputFileParamValue      string
+		variablesParamValue      string
+		expectedOutputParamValue string
+		templateTypeParamValue   string
 	}{
 		{
 			"--input-file",
 			"--variables",
 			"--expected-output",
+			"--template-type",
+			"test/testdata/input_template.yml",
+			`{"notification_branch":"develop","notification_event":"push"}`,
+			"test/testdata/output_template.yml",
+			"",
 		},
 		{
 			"-tf",
 			"-v",
 			"-o",
+			"-tt",
+			"test/testdata/input_starlark_template.py",
+			`{"image":"go:1.14"}`,
+			"test/testdata/output_starlark_template.yml",
+			"starlark",
 		},
 	}
 
 	for _, data := range cases {
 		arguments := []string{
-			data.inputFileParam, helper.AbsolutePath("test/testdata/input_template.yml"),
-			data.variablesParam, `{"notification_branch":"develop","notification_event":"push"}`,
-			data.expectedOutputParam, helper.AbsolutePath("test/testdata/output_template.yml"),
+			data.inputFileParam, helper.AbsolutePath(data.inputFileParamValue),
+			data.variablesParam, data.variablesParamValue,
+			data.expectedOutputParam, helper.AbsolutePath(data.expectedOutputParamValue),
+			data.templateTypeParam, data.templateTypeParamValue,
 		}
 
 		runApp(arguments)
@@ -100,16 +116,29 @@ func TestRunAppWithIndividualParameters(test *testing.T) {
 func TestRunAppWithTemplatesParameter(test *testing.T) {
 	exitCode := captureExitCode(test)
 
-	cases := []string{
-		"--templates",
-		"-ts",
+	cases := []struct {
+		templatesParam      string
+		templatesParamValue string
+	}{
+		{
+			"--templates",
+			fmt.Sprintf(
+				`[{"input_file":"%s","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"%s"}]`,
+				helper.AbsolutePath("test/testdata/input_template.yml"), helper.AbsolutePath("test/testdata/output_template.yml"),
+			),
+		},
+		{
+			"-ts",
+			fmt.Sprintf(
+				`[{"input_file":"%s","variables":{"image":"go:1.14"},"expected_output":"%s","template_type":"starlark"}]`,
+				helper.AbsolutePath("test/testdata/input_starlark_template.py"),
+				helper.AbsolutePath("test/testdata/output_starlark_template.yml"),
+			),
+		},
 	}
 
 	for _, data := range cases {
-		runApp([]string{data, fmt.Sprintf(
-			`[{"input_file":"%s","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"%s"}]`,
-			helper.AbsolutePath("test/testdata/input_template.yml"), helper.AbsolutePath("test/testdata/output_template.yml"),
-		)})
+		runApp([]string{data.templatesParam, data.templatesParamValue})
 
 		assert.Equal(test, 0, exitCode[0])
 	}

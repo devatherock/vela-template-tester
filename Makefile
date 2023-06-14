@@ -1,4 +1,5 @@
 docker_tag=latest
+skip_pull=false
 
 clean:
 	rm -f coverage.out
@@ -30,8 +31,14 @@ build-all:
 	go build -o bin/ ./...
 integration-test:
 	go test -v ./... -tags integration
+docker-build:
+	CGO_ENABLED=0 GOOS=linux go build -o bin/ ./...
+	docker build -t devatherock/vela-template-tester:$(docker_tag) \
+	    -f build/Plugin.Dockerfile .
 functional-test-plugin:
-	docker pull devatherock/vela-template-tester:latest
+ifneq ($(skip_pull), true)
+	docker pull devatherock/vela-template-tester:$(docker_tag)
+endif
 	go test -v ./... -tags functional
 functional-test-api:
 	docker pull devatherock/vela-template-tester-api:$(docker_tag)
