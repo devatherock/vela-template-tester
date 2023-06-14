@@ -46,7 +46,7 @@ jobs:
           keys:
             - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
-      - run: make check
+      - run: make coveralls
 
   build:
     executor: docker-executor
