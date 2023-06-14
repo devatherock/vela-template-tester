@@ -13,6 +13,8 @@
 - [#31](https://github.com/devatherock/vela-template-tester/issues/31): Upgraded `goutils` to `1.1.1`
 - [#29](https://github.com/devatherock/vela-template-tester/issues/29): Upgraded `testify` to `1.8.4`
 - Upgraded go to `1.20`
+- Upgraded sprig to `3.2.3`
+- [#47](https://github.com/devatherock/vela-template-tester/issues/47): Upgraded `logrus` to `1.9.0`
 
 ### Removed
 - Unused `PORT` environment variable from render
