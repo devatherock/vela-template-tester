@@ -42,6 +42,18 @@ func TestMainWithEnvVariables(test *testing.T) {
 		},
 		{
 			map[string]string{
+				"PARAMETER_TEMPLATES": fmt.Sprintf(
+					`[{"input_file":"%s","variables":{"image":"go:1.14"},"expected_output":"%s","template_type":"starlark"}]`,
+					"test/testdata/input_starlark_template.py",
+					"test/testdata/output_starlark_template.yml",
+				),
+				"PARAMETER_LOG_LEVEL": "debug",
+			},
+			0,
+			fmt.Sprintf("Template '%s' is valid.", "test/testdata/input_starlark_template.py"),
+		},
+		{
+			map[string]string{
 				"INPUT_FILE":      "test/testdata/input_template.yml",
 				"VARIABLES":       `{"notification_branch":"develop","notification_event":"push"}`,
 				"EXPECTED_OUTPUT": "test/testdata/output_template.yml",
@@ -57,6 +69,16 @@ func TestMainWithEnvVariables(test *testing.T) {
 			},
 			0,
 			fmt.Sprintf("Template '%s' is valid.", "test/testdata/input_template.yml"),
+		},
+		{
+			map[string]string{
+				"PARAMETER_INPUT_FILE":      "test/testdata/input_starlark_template.py",
+				"PARAMETER_VARIABLES":       `{"image":"go:1.14"}`,
+				"PARAMETER_EXPECTED_OUTPUT": "test/testdata/output_starlark_template.yml",
+				"PARAMETER_TEMPLATE_TYPE":   "starlark",
+			},
+			0,
+			fmt.Sprintf("Template '%s' is valid.", "test/testdata/input_starlark_template.py"),
 		},
 		{
 			map[string]string{},

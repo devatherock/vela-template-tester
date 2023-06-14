@@ -141,6 +141,7 @@ The following parameters can be set to configure the plugin.
 
 **Parameters**
 * **input_file** - Input template file to test. Optional if `templates` is specified
+* **template_type** - The template type. Needs to be `starlark` if `input_file` is a starlark template
 * **variables** - `vars` to test the template with. Doesn't need to be specified if the template can be tested without variables
 * **expected_output** - File containing the expected output of the template after applying the variables. Optional, if not specified, only the validity of the processed template will be checked
 * **templates** - A list of templates to test. Optional if `input_file` is specified

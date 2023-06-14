@@ -19,6 +19,7 @@ type PluginValidationRequest struct {
 	InputFile      string                 `json:"input_file,omitempty"`
 	Variables      map[string]interface{} `json:",omitempty"`
 	ExpectedOutput string                 `json:"expected_output,omitempty"`
+	TemplateType   string                 `json:"template_type,omitempty"`
 }
 
 var exit func(code int) = os.Exit
@@ -44,6 +45,12 @@ func runApp(args []string) {
 			Aliases: []string{"tf"},
 			Usage:   "The template file to test",
 			EnvVars: []string{"INPUT_FILE", "PARAMETER_INPUT_FILE"},
+		},
+		&cli.StringFlag{
+			Name:    "template-type",
+			Aliases: []string{"tt"},
+			Usage:   "The template type. Needs to be 'starlark' if '--input-file' is a starlark template",
+			EnvVars: []string{"TEMPLATE_TYPE", "PARAMETER_TEMPLATE_TYPE"},
 		},
 		&cli.StringFlag{
 			Name:    "templates",
@@ -84,6 +91,7 @@ func run(context *cli.Context) error {
 		}
 		validationRequest.Template = string(content)
 		validationRequest.Parameters = request.Variables
+		validationRequest.Type = request.TemplateType
 
 		validationResponse := validator.Validate(validationRequest)
 		if validationResponse.Error != "" {
@@ -138,6 +146,12 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 		if expectedOutputFile != "" {
 			pluginValidationRequest.ExpectedOutput = expectedOutputFile
 		}
+
+		templateType := context.String("template-type")
+		if templateType != "" {
+			pluginValidationRequest.TemplateType = templateType
+		}
+
 		pluginValidationRequests = append(pluginValidationRequests, pluginValidationRequest)
 	}
 
