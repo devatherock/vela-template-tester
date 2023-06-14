@@ -14,7 +14,7 @@ check:
 	go tool cover -html=coverage.out -o coverage.html
 coveralls:
 	go test -v ./... -tags test -covermode=count -coverprofile=coverage.out -json > test-report.json
-	go get github.com/mattn/goveralls@v0.0.9
+	go get github.com/mattn/goveralls
 	${GOPATH}/bin/goveralls -coverprofile=coverage.out
 run-api:
 	go build -o bin/ ./...
@@ -25,7 +25,6 @@ run-plugin:
 build-all:
 	gofmt -l -w -s .
 	go vet ./...
-	go mod tidy
 	go test -v ./... -tags test
 	mkdir -p bin
 	go build -o bin/ ./...
