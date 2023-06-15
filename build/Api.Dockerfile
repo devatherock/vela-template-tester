@@ -4,7 +4,7 @@ FROM golang:${GO_VERSION}-alpine3.18 AS build
 COPY . /home/workspace
 WORKDIR /home/workspace
 
-RUN go build -o bin/ ./...
+RUN go build -o bin/ ./cmd/app
 
 
 FROM alpine:3.18.0

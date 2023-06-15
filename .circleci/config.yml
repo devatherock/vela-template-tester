@@ -4,9 +4,6 @@ template_tester_image: &template_tester_image
       auth:
         username: $DOCKER_USERNAME
         password: $DOCKER_PASSWORD
-    
-orbs:
-  docker: circleci/docker@1.5.0
   
 work_directory: &work_directory
   working_directory: ~/vela-template-tester
@@ -21,6 +18,11 @@ release_filter: &release_filter
     tags:
       only: /^v[0-9\.]+$/
       
+pr_filter: &pr_filter
+  filters:
+    branches:
+      ignore: master
+
 parameters:
   go_version:
     type: string
@@ -93,7 +95,6 @@ jobs:
             --driver docker-container --use --bootstrap
           docker buildx build \
               --platform linux/amd64,linux/arm64 \
-              --push \
               --build-arg GO_VERSION=<< pipeline.parameters.go_version >> \
               -t devatherock/<< parameters.docker_image >>:$TAG \
               -t devatherock/<< parameters.docker_image >>:latest \
@@ -336,9 +337,17 @@ workflows:
             
   pr_check:
     jobs:
-      - test:
+      - publish:
+          name: publish_api
           context:
             - docker-credentials
-          filters:
-            branches:
-              ignore: master
+          command_args: '-f build/Api.Dockerfile .'
+          docker_image: 'vela-template-tester-api'
+          <<: *pr_filter
+      - publish:
+          name: publish_plugin
+          context:
+            - docker-credentials
+          command_args: '-f build/Plugin.Dockerfile .'  
+          docker_image: 'vela-template-tester'
+          <<: *pr_filter
