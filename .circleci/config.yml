@@ -35,7 +35,7 @@ executors:
         auth:
           username: $DOCKER_USERNAME
           password: $DOCKER_PASSWORD
-    resource_class: medium
+    <<: *resource_class
     <<: *work_directory
   machine-executor:
     machine:
@@ -96,6 +96,7 @@ jobs:
             --driver docker-container --use --bootstrap
           docker buildx build \
               --platform linux/amd64,linux/arm64 \
+              --push \
               --build-arg GO_VERSION=<< pipeline.parameters.go_version >> \
               -t devatherock/<< parameters.docker_image >>:$TAG \
               -t devatherock/<< parameters.docker_image >>:latest \
@@ -338,17 +339,7 @@ workflows:
             
   pr_check:
     jobs:
-      - publish:
-          name: publish_api
+      - test:
           context:
             - docker-credentials
-          command_args: '-f build/Api.Dockerfile .'
-          docker_image: 'vela-template-tester-api'
-          <<: *pr_filter
-      - publish:
-          name: publish_plugin
-          context:
-            - docker-credentials
-          command_args: '-f build/Plugin.Dockerfile .'  
-          docker_image: 'vela-template-tester'
           <<: *pr_filter
