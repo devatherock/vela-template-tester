@@ -1,10 +1,8 @@
-template_tester_image: &template_tester_image
-  docker:
-    - image: devatherock/vela-template-tester:latest
-      auth:
-        username: $DOCKER_USERNAME
-        password: $DOCKER_PASSWORD
-  
+docker_auth: &docker_auth
+  auth:
+    username: $DOCKER_USERNAME
+    password: $DOCKER_PASSWORD
+
 work_directory: &work_directory
   working_directory: ~/vela-template-tester
 
@@ -32,9 +30,13 @@ executors:
   docker-executor:
     docker:
       - image: cimg/go:<< pipeline.parameters.go_version >>
-        auth:
-          username: $DOCKER_USERNAME
-          password: $DOCKER_PASSWORD
+        <<: *docker_auth
+    <<: *resource_class
+    <<: *work_directory
+  template-tester:
+    docker:
+      - image: devatherock/vela-template-tester:latest
+        <<: *docker_auth
     <<: *resource_class
     <<: *work_directory
   machine-executor:
@@ -50,6 +52,21 @@ executors:
 
 version: 2.1
 jobs:
+  changelog_updater:
+    docker:
+      - image: devatherock/changelog-updater:0.1.0
+        <<: *docker_auth
+    <<: *resource_class
+    environment:
+      VELA_BUILD_AUTHOR: "renovate[bot]"
+      VELA_BUILD_AUTHOR_EMAIL: "29139614+renovate[bot]@users.noreply.github.com"
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "4a:86:fe:0e:c3:0e:ad:0d:1d:5c:3e:48:cf:28:39:5d"
+      - checkout
+      - run: sh /scripts/entry-point.sh
+
   test:
     executor: docker-executor
     steps:
@@ -59,6 +76,16 @@ jobs:
             - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
       - run: make check
+
+  fast_functional_test:
+    parameters:
+      image_type:
+        type: string
+    executor: machine-executor
+    steps:
+      - checkout
+      - run: |
+          make docker-build-<< parameters.image_type >> functional-test-<< parameters.image_type >> skip_pull=true
 
   build:
     executor: docker-executor
@@ -121,9 +148,7 @@ jobs:
               peterevans/dockerhub-description:3.4.1
 
   test_plugin_single:
-    <<: *template_tester_image
-    <<: *resource_class
-    <<: *work_directory
+    executor: template-tester
     environment:
       PARAMETER_INPUT_FILE: "test/testdata/input_template.yml"
       PARAMETER_VARIABLES: '{"notification_branch":"develop","notification_event":"push"}'
@@ -136,9 +161,7 @@ jobs:
       - run: /bin/velatemplatetesterplugin
 
   test_plugin_list:
-    <<: *template_tester_image
-    <<: *resource_class
-    <<: *work_directory
+    executor: template-tester
     environment:
       PARAMETER_TEMPLATES: '[{"input_file":"test/testdata/input_template.yml","variables":{"notification_branch":"develop","notification_event":"push"},"expected_output":"test/testdata/output_template.yml"}]'
     steps:
@@ -181,7 +204,6 @@ jobs:
           
   deploy:
     executor: docker-executor
-    <<: *resource_class
     steps:
       - run:
           name: Trigger deployment to render.com
@@ -191,9 +213,7 @@ jobs:
   notify:
     docker:
       - image: devatherock/simple-slack:0.7.0
-        auth:
-          username: $DOCKER_USERNAME
-          password: $DOCKER_PASSWORD
+        <<: *docker_auth
     <<: *resource_class
     environment:
       TEXT: "Success: {{.CircleBuildUrl}} by {{.CircleUsername}}"
@@ -339,7 +359,27 @@ workflows:
             
   pr_check:
     jobs:
+      - changelog_updater:
+          context:
+            - docker-credentials
+            - changelog-updater-credentials
+          <<: *pr_filter
       - test:
           context:
             - docker-credentials
-          <<: *pr_filter
+          requires:
+            - changelog_updater
+      - fast_functional_test:
+          name: fast_functional_test_api
+          context:
+            - docker-credentials
+          image_type: 'api'
+          requires:
+            - test
+      - fast_functional_test:
+          name: fast_functional_test_plugin
+          context:
+            - docker-credentials
+          image_type: 'plugin'
+          requires:
+            - test
