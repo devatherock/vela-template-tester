@@ -30,8 +30,7 @@ build-all:
 	go build -o bin/ ./...
 integration-test:
 	go test -v ./... -tags integration
-docker-build:
-	CGO_ENABLED=0 GOOS=linux go build -o bin/ ./...
+docker-build-plugin:
 	docker build -t devatherock/vela-template-tester:$(docker_tag) \
 	    -f build/Plugin.Dockerfile .
 functional-test-plugin:
@@ -39,8 +38,13 @@ ifneq ($(skip_pull), true)
 	docker pull devatherock/vela-template-tester:$(docker_tag)
 endif
 	go test -v ./... -tags functional
+docker-build-api:
+	docker build -t devatherock/vela-template-tester-api:$(docker_tag) \
+	    -f build/Api.Dockerfile .
 functional-test-api:
+ifneq ($(skip_pull), true)
 	docker pull devatherock/vela-template-tester-api:$(docker_tag)
+endif
 	DOCKER_TAG=$(docker_tag) docker-compose -f build/docker-compose.yml up -d
 	sleep 1
 	go test -v ./... -tags api

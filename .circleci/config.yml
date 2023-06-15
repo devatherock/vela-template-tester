@@ -20,11 +20,16 @@ release_filter: &release_filter
       only: non-existent-branch
     tags:
       only: /^v[0-9\.]+$/
+      
+parameters:
+  go_version:
+    type: string
+    default: "1.20"
 
 executors:
   docker-executor:
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:<< pipeline.parameters.go_version >>
         auth:
           username: $DOCKER_USERNAME
           password: $DOCKER_PASSWORD
@@ -50,9 +55,6 @@ jobs:
 
   build:
     executor: docker-executor
-    environment:
-      CGO_ENABLED: 0
-      GOOS: linux
     steps:
       - checkout
       - restore_cache:
@@ -66,25 +68,13 @@ jobs:
           paths:
             - "/go/pkg"
           key: v1-pkg-cache-{{ checksum "go.mod" }}
-      - persist_to_workspace:
-          root: ~/vela-template-tester
-          paths:
-            - bin
-            
-  integration_test:
-    executor: docker-executor
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/vela-template-tester
-      - restore_cache:
-          keys:
-            - v1-pkg-cache-{{ checksum "go.mod" }}
-            - v1-pkg-cache
-      - run: |
-          make integration-test
 
   publish:
+    parameters:
+      command_args:
+        type: string
+      docker_image:
+        type: string
     executor: docker-executor
     steps:
       - checkout
@@ -93,11 +83,14 @@ jobs:
           at: ~/vela-template-tester
       - run: |
           TAG=${CIRCLE_SHA1:0:8}
-          docker build -t devatherock/vela-template-tester-api:$TAG -f build/Api.Dockerfile .
-          docker tag devatherock/vela-template-tester-api:$TAG devatherock/vela-template-tester-api:latest
+          docker build \
+              --build-arg GO_VERSION=<< pipeline.parameters.go_version >> \
+              -t devatherock/<< parameters.docker_image >>:$TAG \
+              -t devatherock/<< parameters.docker_image >>:latest \
+              << parameters.command_args >>
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-          docker push devatherock/vela-template-tester-api:$TAG
-          docker push devatherock/vela-template-tester-api:latest
+          docker push devatherock/<< parameters.docker_image >>:$TAG
+          docker push devatherock/<< parameters.docker_image >>:latest
           
   dockerhub_readme:
     executor: machine-executor
@@ -205,29 +198,22 @@ workflows:
           filters:
             branches:
               only: master
-      - integration_test:
+      - publish:
+          name: publish_api
           context:
             - docker-credentials
+          command_args: '-f build/Api.Dockerfile .'
+          docker_image: 'vela-template-tester-api'
           requires:
             - build
       - publish:
-          context:
-            - docker-credentials
-          requires:
-            - integration_test
-      - docker/publish:
           name: publish_plugin
-          executor: docker-executor
           context:
             - docker-credentials
+          command_args: '-f build/Plugin.Dockerfile .'  
+          docker_image: 'vela-template-tester'
           requires:
-            - integration_test
-          image: devatherock/vela-template-tester
-          attach-at: ~/vela-template-tester
-          tag: "${CIRCLE_SHA1:0:8},latest"
-          use-remote-docker: true
-          docker-username: DOCKER_USERNAME
-          dockerfile: build/Plugin.Dockerfile
+            - build
       - dockerhub_readme:
           name: dockerhub_readme_api
           context:
@@ -236,7 +222,7 @@ workflows:
           docker_image: 'vela-template-tester-api'
           image_type: 'API'
           requires:
-            - publish
+            - publish_api
       - dockerhub_readme:
           name: dockerhub_readme_plugin
           context:
