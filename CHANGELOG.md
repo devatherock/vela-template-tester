@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - [#13](https://github.com/devatherock/vela-template-tester/issues/13): Functional tests
+- `changelog-updater` to CI pipeline
 
 ### Changed
 - Combined jobs in CI pipeline using parameters
