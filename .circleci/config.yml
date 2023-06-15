@@ -4,9 +4,6 @@ template_tester_image: &template_tester_image
       auth:
         username: $DOCKER_USERNAME
         password: $DOCKER_PASSWORD
-    
-orbs:
-  docker: circleci/docker@1.5.0
   
 work_directory: &work_directory
   working_directory: ~/vela-template-tester
@@ -21,6 +18,11 @@ release_filter: &release_filter
     tags:
       only: /^v[0-9\.]+$/
       
+pr_filter: &pr_filter
+  filters:
+    branches:
+      ignore: master
+
 parameters:
   go_version:
     type: string
@@ -69,9 +71,10 @@ jobs:
       - run: |
           make coveralls
           make build-all
+          make integration-test
       - save_cache:
           paths:
-            - "/go/pkg"
+            - "/home/circleci/go/pkg"
           key: v1-pkg-cache-{{ checksum "go.mod" }}
 
   publish:
@@ -339,6 +342,4 @@ workflows:
       - test:
           context:
             - docker-credentials
-          filters:
-            branches:
-              ignore: master
+          <<: *pr_filter
