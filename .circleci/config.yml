@@ -71,6 +71,7 @@ jobs:
       - run: |
           make coveralls
           make build-all
+          make integration-test
       - save_cache:
           paths:
             - "/go/pkg"

@@ -5,7 +5,6 @@ COPY . /home/workspace
 WORKDIR /home/workspace
 
 RUN go build -o bin/ ./cmd/plugin
-RUN go test -v ./... -tags integration
 
 
 FROM alpine:3.18.0
