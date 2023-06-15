@@ -4,7 +4,12 @@ FROM golang:${GO_VERSION}-alpine3.18 AS build
 COPY . /home/workspace
 WORKDIR /home/workspace
 
-RUN go build -o bin/ ./cmd/plugin
+ARG TARGETPLATFORM
+RUN case ${TARGETPLATFORM:-linux/amd64} in \
+        "linux/arm64")   GO_ARCH="arm64" ;; \
+        *)               GO_ARCH="amd64" ;; \
+    esac; \
+    GOARCH=${GO_ARCH} go build -o bin/ ./cmd/plugin
 
 
 FROM alpine:3.18.0
