@@ -54,11 +54,11 @@ jobs:
     executor: docker-executor
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-pkg-cache-{{ checksum "go.mod" }}
-            - v1-pkg-cache
       - run: make check
+      - save_cache:
+          paths:
+            - "/home/circleci/go/pkg"
+          key: v1-pkg-cache-{{ checksum "go.mod" }}
 
   build:
     executor: docker-executor
@@ -74,7 +74,7 @@ jobs:
           make integration-test
       - save_cache:
           paths:
-            - "/go/pkg"
+            - "/home/circleci/go/pkg"
           key: v1-pkg-cache-{{ checksum "go.mod" }}
 
   publish:
