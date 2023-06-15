@@ -40,6 +40,11 @@ executors:
       image: ubuntu-2204:2023.04.2
     resource_class: medium
     <<: *work_directory
+  arm-executor:
+    machine:
+      image: ubuntu-2004:2022.04.1
+    resource_class: arm.medium
+    <<: *work_directory
 
 version: 2.1
 jobs:
@@ -83,14 +88,16 @@ jobs:
           at: ~/vela-template-tester
       - run: |
           TAG=${CIRCLE_SHA1:0:8}
-          docker build \
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          docker buildx create --name rockbuilder \
+            --driver docker-container --use --bootstrap
+          docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              --push \
               --build-arg GO_VERSION=<< pipeline.parameters.go_version >> \
               -t devatherock/<< parameters.docker_image >>:$TAG \
               -t devatherock/<< parameters.docker_image >>:latest \
               << parameters.command_args >>
-          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-          docker push devatherock/<< parameters.docker_image >>:$TAG
-          docker push devatherock/<< parameters.docker_image >>:latest
           
   dockerhub_readme:
     executor: machine-executor
@@ -138,10 +145,12 @@ jobs:
       - run: /bin/velatemplatetesterplugin
 
   functional_test:
-    executor: machine-executor
     parameters:
       command_args:
         type: string
+      runner:
+        type: executor
+    executor: << parameters.runner >>
     steps:
       - checkout
       - run: |
@@ -161,9 +170,11 @@ jobs:
           TAG=${CIRCLE_TAG#v}
           DEV_TAG=${CIRCLE_SHA1:0:8}
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-          docker pull devatherock/<< parameters.docker_image >>:$DEV_TAG
-          docker tag devatherock/<< parameters.docker_image >>:$DEV_TAG devatherock/<< parameters.docker_image >>:$TAG
-          docker push devatherock/<< parameters.docker_image >>:$TAG
+          docker buildx create --name rockbuilder \
+            --driver docker-container --use --bootstrap
+          docker buildx imagetools create \ 
+            -t devatherock/<< parameters.docker_image >>:$TAG \
+            devatherock/<< parameters.docker_image >>:$DEV_TAG
           
   deploy:
     executor: docker-executor
@@ -247,6 +258,7 @@ workflows:
           context:
             - docker-credentials
           command_args: 'functional-test-api'
+          runner: machine-executor
           requires:
             - dockerhub_readme_api
       - functional_test:
@@ -254,6 +266,23 @@ workflows:
           context:
             - docker-credentials
           command_args: 'functional-test-plugin'
+          runner: machine-executor
+          requires:
+            - dockerhub_readme_plugin
+      - functional_test:
+          name: functional_test_api_arm
+          context:
+            - docker-credentials
+          command_args: 'functional-test-api'
+          runner: arm-executor
+          requires:
+            - dockerhub_readme_api
+      - functional_test:
+          name: functional_test_plugin_arm
+          context:
+            - docker-credentials
+          command_args: 'functional-test-plugin'
+          runner: arm-executor
           requires:
             - test_plugin_single
             - test_plugin_list
@@ -264,6 +293,8 @@ workflows:
           requires:
             - functional_test_api
             - functional_test_plugin
+            - functional_test_api_arm
+            - functional_test_plugin_arm
 
   release_api:
     jobs:
