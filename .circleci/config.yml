@@ -198,7 +198,7 @@ jobs:
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
           docker buildx create --name rockbuilder \
             --driver docker-container --use --bootstrap
-          docker buildx imagetools create \ 
+          docker buildx imagetools create \
             -t devatherock/<< parameters.docker_image >>:$TAG \
             devatherock/<< parameters.docker_image >>:$DEV_TAG
           
