@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Removed
+- Trailing spaces in yaml files
+
+## [1.0.0] - 2023-06-16
 ### Added
 - [#13](https://github.com/devatherock/vela-template-tester/issues/13): Functional tests
 - `changelog-updater` to CI pipeline

@@ -1,5 +1,6 @@
 docker_tag=latest
 skip_pull=false
+lint_yaml=false
 
 clean:
 	rm -f coverage.out
@@ -8,6 +9,9 @@ clean:
 	rm -rf bin
 	go clean -testcache
 check:
+ifeq ($(lint_yaml), true)
+	yamllint -d relaxed .circleci render.yaml build --no-warnings
+endif
 	gofmt -l -w -s .
 	go vet ./...
 	go test -v ./... -tags test -race -coverprofile=coverage.out
