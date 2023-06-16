@@ -8,14 +8,14 @@ work_directory: &work_directory
 
 resource_class: &resource_class
   resource_class: small
-  
+
 release_filter: &release_filter
   filters:
     branches:
       only: non-existent-branch
     tags:
       only: /^v[0-9\.]+$/
-      
+
 pr_filter: &pr_filter
   filters:
     branches:
@@ -128,7 +128,7 @@ jobs:
               -t devatherock/<< parameters.docker_image >>:$TAG \
               -t devatherock/<< parameters.docker_image >>:latest \
               << parameters.command_args >>
-          
+
   dockerhub_readme:
     executor: machine-executor
     parameters:
@@ -181,7 +181,7 @@ jobs:
       - checkout
       - run: |
           make << parameters.command_args >>
-            
+
   release:
     executor: docker-executor
     parameters:
@@ -201,7 +201,7 @@ jobs:
           docker buildx imagetools create \
             -t devatherock/<< parameters.docker_image >>:$TAG \
             devatherock/<< parameters.docker_image >>:$DEV_TAG
-          
+
   deploy:
     executor: docker-executor
     steps:
@@ -209,7 +209,7 @@ jobs:
           name: Trigger deployment to render.com
           command: |
             curl $RENDER_DEPLOY_HOOK
-            
+
   notify:
     docker:
       - image: devatherock/simple-slack:0.7.0
@@ -220,7 +220,7 @@ jobs:
       CHANNEL: general
       TITLE: "Build completed"
     steps:
-      - run: /bin/simpleslack -c "#33ad7f"            
+      - run: /bin/simpleslack -c "#33ad7f"
 
 workflows:
   version: 2.1
@@ -244,7 +244,7 @@ workflows:
           name: publish_plugin
           context:
             - docker-credentials
-          command_args: '-f build/Plugin.Dockerfile .'  
+          command_args: '-f build/Plugin.Dockerfile .'
           docker_image: 'vela-template-tester'
           requires:
             - build
@@ -340,7 +340,7 @@ workflows:
           <<: *release_filter
           requires:
             - deploy
-            
+
   release_plugin:
     jobs:
       - release:
@@ -356,7 +356,7 @@ workflows:
           <<: *release_filter
           requires:
             - release_plugin
-            
+
   pr_check:
     jobs:
       - changelog_updater:
