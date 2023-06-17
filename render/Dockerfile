@@ -1,1 +1,1 @@
-FROM devatherock/vela-template-tester-api:0.5.0
+FROM devatherock/vela-template-tester-api:1.0.0
