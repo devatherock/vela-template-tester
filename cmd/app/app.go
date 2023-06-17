@@ -4,7 +4,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 
@@ -32,14 +32,14 @@ func expandTemplate(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/x-yaml")
 
 	// Read request
-	requestBody, err := ioutil.ReadAll(request.Body)
+	requestBody, err := io.ReadAll(request.Body)
 	if err != nil {
 		return
 	}
 
 	// Parse request
 	validationRequest := validator.ValidationRequest{}
-	err = yaml.Unmarshal(requestBody, &validationRequest)
+	yaml.Unmarshal(requestBody, &validationRequest)
 
 	// Validate template
 	validationResponse := validator.Validate(validationRequest)

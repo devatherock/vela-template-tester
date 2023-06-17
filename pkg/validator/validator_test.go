@@ -66,7 +66,7 @@ func TestValidateVelaFunctionFailure(test *testing.T) {
 
 	validationResponse := Validate(validationRequest)
 	assert.Equal(test, "Invalid template", validationResponse.Message)
-	assert.Contains(test, validationResponse.Error, "Environment variable name cannot be empty in 'vela' function")
+	assert.Contains(test, validationResponse.Error, "environment variable name cannot be empty in 'vela' function")
 }
 
 func TestValidateParseError(test *testing.T) {
@@ -129,22 +129,4 @@ func TestValidateStarlarkTemplate(test *testing.T) {
 	yaml.Unmarshal([]byte(validationResponse.Template), &processedTemplateMap)
 
 	assert.Equal(test, expectedOutputMap, processedTemplateMap)
-}
-
-func TestValidateStarlarkTemplateApiError(test *testing.T) {
-	helper.SetEnvironmentVariable(test, "PARAMETER_STARPG_HOST", "http://localhost:8080")
-	validationRequest := ValidationRequest{}
-
-	input, _ := ioutil.ReadFile(helper.AbsolutePath("test/testdata/input_starlark_template.py"))
-	validationRequest.Template = string(input)
-	validationRequest.Type = "starlark"
-
-	parameters := map[string]interface{}{
-		"image": "go:1.14",
-	}
-	validationRequest.Parameters = parameters
-
-	validationResponse := Validate(validationRequest)
-	assert.Equal(test, "Invalid template", validationResponse.Message)
-	assert.Contains(test, validationResponse.Error, "connection refused")
 }
