@@ -1,7 +1,7 @@
 package helper
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,8 +16,8 @@ func ExecuteCommand(command *exec.Cmd) (int, string) {
 	stdOut, _ := command.StdoutPipe()
 	stdErr, _ := command.StderrPipe()
 	command.Start()
-	stdOutBytes, _ := ioutil.ReadAll(stdOut)
-	stdErrBytes, _ := ioutil.ReadAll(stdErr)
+	stdOutBytes, _ := io.ReadAll(stdOut)
+	stdErrBytes, _ := io.ReadAll(stdErr)
 	command.Wait()
 
 	output := string(stdOutBytes) + string(stdErrBytes)

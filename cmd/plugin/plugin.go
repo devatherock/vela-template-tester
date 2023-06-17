@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 
@@ -85,7 +84,7 @@ func run(context *cli.Context) error {
 	for _, request := range pluginValidationRequests {
 		validationRequest := validator.ValidationRequest{}
 
-		content, error := ioutil.ReadFile(request.InputFile)
+		content, error := os.ReadFile(request.InputFile)
 		if error != nil {
 			return error
 		}
@@ -176,7 +175,7 @@ func readInputParameters(context *cli.Context) []PluginValidationRequest {
 // Verifies if the processed template matches the expected output
 func verifyOutput(request PluginValidationRequest, validationResponse validator.ValidationResponse) bool {
 	if request.ExpectedOutput != "" {
-		expectedOutput, error := ioutil.ReadFile(request.ExpectedOutput)
+		expectedOutput, error := os.ReadFile(request.ExpectedOutput)
 		util.HandleError(error)
 
 		expectedOutputMap := make(map[interface{}]interface{})

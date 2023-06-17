@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -13,7 +11,9 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/qri-io/starlib"
 	log "github.com/sirupsen/logrus"
+	"go.starlark.net/starlark"
 	"gopkg.in/yaml.v2"
 )
 
@@ -28,8 +28,6 @@ type ValidationRequest struct {
 	Template   string
 	Type       string
 }
-
-var client = &http.Client{}
 
 func Validate(validationRequest ValidationRequest) (validationResponse ValidationResponse) {
 	validationResponse = ValidationResponse{}
@@ -73,8 +71,8 @@ func Validate(validationRequest ValidationRequest) (validationResponse Validatio
 
 func validateGoTemplate(validationRequest *ValidationRequest) (string, error) {
 	buffer := new(bytes.Buffer)
-	parsedTemplate, err := template.New("test").Funcs(VelaFuncMap()).Funcs(sprig.TxtFuncMap()).Parse(validationRequest.Template)
-	err = parsedTemplate.Execute(buffer, validationRequest.Parameters)
+	parsedTemplate, _ := template.New("test").Funcs(VelaFuncMap()).Funcs(sprig.TxtFuncMap()).Parse(validationRequest.Template)
+	err := parsedTemplate.Execute(buffer, validationRequest.Parameters)
 
 	outputTemplate := buffer.String()
 	return outputTemplate, err
@@ -87,18 +85,24 @@ func validateStarlarkTemplate(validationRequest *ValidationRequest) (string, err
 	contextJson, _ := jsoniter.Marshal(context)
 
 	requestBody := validationRequest.Template + "\nctx = " + string(contextJson) + "\nprint(main(ctx))"
-	req, _ := http.NewRequest("POST", getStarlarkPlaygroundHost()+"/exec", bytes.NewBuffer([]byte(requestBody)))
-	response, err := client.Do(req)
+	file, _ := os.CreateTemp("", "exec_starlark")
+	os.WriteFile(file.Name(), []byte(requestBody), 0755)
 
-	if err != nil {
-		return "", err
+	output := ""
+	thread := &starlark.Thread{
+		Print: func(thread *starlark.Thread, msg string) {
+			output = msg
+		},
+		Load: starlib.Loader,
 	}
-	defer response.Body.Close()
 
-	output, _ := ioutil.ReadAll(response.Body)
-	outputObject := make(map[string]interface{})
-	json.Unmarshal(output, &outputObject)
-	outputTemplate, err := yaml.Marshal(&outputObject)
+	outputTemplate := make([]byte, 1)
+	_, err := starlark.ExecFile(thread, file.Name(), nil, nil)
+	if err == nil {
+		outputObject := make(map[string]interface{})
+		json.Unmarshal([]byte(output), &outputObject)
+		outputTemplate, err = yaml.Marshal(&outputObject)
+	}
 
 	return string(outputTemplate), err
 }
@@ -121,17 +125,7 @@ func vela(variableName string) (envVariable string, err error) {
 	if variableName != "" {
 		envVariable = "${" + strings.ToUpper(variableName) + "}"
 	} else {
-		err = errors.New("Environment variable name cannot be empty in 'vela' function")
-	}
-
-	return
-}
-
-// Configurable Starlark playground server. Helps with unit testing
-func getStarlarkPlaygroundHost() (url string) {
-	url = os.Getenv("PARAMETER_STARPG_HOST")
-	if url == "" {
-		url = "https://starpg.onrender.com"
+		err = errors.New("environment variable name cannot be empty in 'vela' function")
 	}
 
 	return

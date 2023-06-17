@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Removed
 - Trailing spaces in yaml files
+- Dependence on `starpg`
 
 ## [1.0.0] - 2023-06-16
 ### Added

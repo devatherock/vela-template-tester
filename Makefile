@@ -1,6 +1,6 @@
 docker_tag=latest
 skip_pull=false
-lint_yaml=false
+all=false
 
 clean:
 	rm -f coverage.out
@@ -9,8 +9,9 @@ clean:
 	rm -rf bin
 	go clean -testcache
 check:
-ifeq ($(lint_yaml), true)
+ifeq ($(all), true)
 	yamllint -d relaxed .circleci render.yaml build --no-warnings
+	${GOPATH}/bin/staticcheck ./...
 endif
 	gofmt -l -w -s .
 	go vet ./...
