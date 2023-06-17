@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- chore(deps): update devatherock/simple-slack docker tag to v1
+
 ### Removed
 - Trailing spaces in yaml files
 - Dependence on `starpg`
