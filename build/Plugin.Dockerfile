@@ -16,7 +16,8 @@ RUN case ${TARGETPLATFORM:-linux/amd64} in \
 	tar -xJf upx_linux.tar.xz; \
 	cp upx-${UPX_VERSION}-${UPX_ARCH}_linux/upx /bin/
 
-RUN go build -o bin/ ./cmd/plugin && upx -4 bin/plugin
+RUN go build -o bin/ ./cmd/plugin
+RUN upx -4 bin/plugin
 
 
 FROM alpine:3.18.2
