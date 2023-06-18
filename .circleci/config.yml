@@ -81,7 +81,7 @@ jobs:
     parameters:
       image_type:
         type: string
-    executor: machine-executor
+    executor: arm-executor
     steps:
       - checkout
       - run: |
