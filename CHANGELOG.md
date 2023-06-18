@@ -4,6 +4,7 @@
 ### Changed
 - chore(deps): update devatherock/simple-slack docker tag to v1
 - chore(deps): update devatherock/vela-template-tester-api docker tag to v1
+- fix(deps): update module gopkg.in/yaml.v2 to v3
 
 ### Removed
 - Trailing spaces in yaml files
