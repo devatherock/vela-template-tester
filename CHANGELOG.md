@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Changed
 - chore(deps): update devatherock/simple-slack docker tag to v1
+- Compressed the plugin binary using upx
 
 ### Removed
 - Trailing spaces in yaml files
