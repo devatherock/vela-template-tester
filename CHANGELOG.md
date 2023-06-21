@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Changed
 - chore(deps): update devatherock/simple-slack docker tag to v1
+- Made only HIGH bolt vulnerabilities create issues
 
 ### Removed
 - Trailing spaces in yaml files

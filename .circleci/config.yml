@@ -3,6 +3,9 @@ docker_auth: &docker_auth
     username: $DOCKER_USERNAME
     password: $DOCKER_PASSWORD
 
+workspace: &workspace
+  at: ~/vela-template-tester
+
 work_directory: &work_directory
   working_directory: ~/vela-template-tester
 
@@ -115,7 +118,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - attach_workspace:
-          at: ~/vela-template-tester
+          <<: *workspace
       - run: |
           TAG=${CIRCLE_SHA1:0:8}
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
@@ -130,22 +133,26 @@ jobs:
               << parameters.command_args >>
 
   dockerhub_readme:
-    executor: machine-executor
     parameters:
       docker_image:
         type: string
       image_type:
         type: string
+    docker:
+      - image: peterevans/dockerhub-description:3.4.2
+        <<: *docker_auth
+    <<: *resource_class
+    <<: *work_directory
+    environment:
+      DOCKERHUB_REPOSITORY: 'devatherock/<< parameters.docker_image >>'
+      SHORT_DESCRIPTION: '<< parameters.image_type >> to test and validate vela-ci templates'
+      README_FILEPATH: README.md
     steps:
       - checkout
+      - attach_workspace:
+          <<: *workspace
       - run: |
-          docker run -v $PWD:/workspace \
-              -e DOCKERHUB_USERNAME \
-              -e DOCKERHUB_PASSWORD \
-              -e DOCKERHUB_REPOSITORY='devatherock/<< parameters.docker_image >>' \
-              -e SHORT_DESCRIPTION='<< parameters.image_type >> to test and validate vela-ci templates' \
-              -e README_FILEPATH='/workspace/README.md' \
-              peterevans/dockerhub-description:3.4.1
+          sh /entrypoint.sh
 
   test_plugin_single:
     executor: template-tester
@@ -157,7 +164,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/vela-template-tester
+          <<: *workspace
       - run: /bin/velatemplatetesterplugin
 
   test_plugin_list:
@@ -167,7 +174,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/vela-template-tester
+          <<: *workspace
       - run: /bin/velatemplatetesterplugin
 
   functional_test:
@@ -191,7 +198,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - attach_workspace:
-          at: ~/vela-template-tester
+          <<: *workspace
       - run: |
           TAG=${CIRCLE_TAG#v}
           DEV_TAG=${CIRCLE_SHA1:0:8}
