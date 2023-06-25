@@ -5,6 +5,7 @@
 - chore(deps): update devatherock/simple-slack docker tag to v1
 - Made only HIGH bolt vulnerabilities create issues
 - fix(deps): update module github.com/urfave/cli/v2 to v2.25.7
+- fix(deps): update go.starlark.net digest to 9532f56
 
 ### Removed
 - Trailing spaces in yaml files
