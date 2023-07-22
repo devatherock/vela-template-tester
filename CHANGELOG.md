@@ -7,6 +7,7 @@
 - fix(deps): update module github.com/urfave/cli/v2 to v2.25.7
 - fix(deps): update go.starlark.net digest to 9532f56
 - fix(deps): update go.starlark.net digest to 2226322
+- fix(deps): update go.starlark.net digest to 08598ae
 
 ### Removed
 - Trailing spaces in yaml files
