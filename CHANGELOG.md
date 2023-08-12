@@ -9,6 +9,7 @@
 - fix(deps): update go.starlark.net digest to 2226322
 - fix(deps): update go.starlark.net digest to 08598ae
 - fix(deps): update go.starlark.net digest to 9b46791
+- fix(deps): update go.starlark.net digest to 2aa7575
 
 ### Removed
 - Trailing spaces in yaml files
