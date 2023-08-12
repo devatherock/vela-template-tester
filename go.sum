@@ -121,6 +121,8 @@ go.starlark.net v0.0.0-20230721164632-08598ae210f9 h1:yqYhkJOFDp5pNek8iA/AYiQ33e
 go.starlark.net v0.0.0-20230721164632-08598ae210f9/go.mod h1:jxU+3+j+71eXOW14274+SmmuW82qJzl6iZSeqEtTGds=
 go.starlark.net v0.0.0-20230731234521-9b46791399bf h1:8sb2EffLsgYa0V3wDeqJDov1ux7XdZZv9HrazRIcnWw=
 go.starlark.net v0.0.0-20230731234521-9b46791399bf/go.mod h1:jxU+3+j+71eXOW14274+SmmuW82qJzl6iZSeqEtTGds=
+go.starlark.net v0.0.0-20230807144010-2aa75752d1da h1:FlKSIJl+UmVFgpyCr4Bdmj443NNBDW5ZSDP/HciJ96g=
+go.starlark.net v0.0.0-20230807144010-2aa75752d1da/go.mod h1:jxU+3+j+71eXOW14274+SmmuW82qJzl6iZSeqEtTGds=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/crypto v0.3.0 h1:a06MkbcxBrEFc0w0QIZWXrH/9cCX6KJyWbBOIwAn+7A=
