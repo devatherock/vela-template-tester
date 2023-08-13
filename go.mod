@@ -9,7 +9,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.25.7
-	go.starlark.net v0.0.0-20230731234521-9b46791399bf
+	go.starlark.net v0.0.0-20230807144010-2aa75752d1da
 	gopkg.in/yaml.v2 v2.4.0
 )
 
