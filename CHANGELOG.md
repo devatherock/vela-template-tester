@@ -15,6 +15,7 @@
 - fix(deps): update go.starlark.net digest to 556fd59
 - fix(deps): update go.starlark.net digest to 90ade8b
 - chore(deps): update alpine docker tag to v3.18.5
+- fix(deps): update module github.com/urfave/cli/v2 to v2.26.0
 
 ### Removed
 - Trailing spaces in yaml files
