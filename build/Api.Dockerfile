@@ -7,7 +7,7 @@ WORKDIR /home/workspace
 RUN go build -o bin/ ./cmd/app
 
 
-FROM alpine:3.18.5
+FROM alpine:3.19.0
 
 COPY --from=build /home/workspace/bin/app /bin/velatemplatetesterapi
 
