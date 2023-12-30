@@ -17,6 +17,7 @@
 - chore(deps): update alpine docker tag to v3.18.5
 - fix(deps): update module github.com/urfave/cli/v2 to v2.26.0
 - chore(deps): update alpine docker tag to v3.19.0
+- fix(deps): update module github.com/urfave/cli/v2 to v2.27.1
 
 ### Removed
 - Trailing spaces in yaml files
