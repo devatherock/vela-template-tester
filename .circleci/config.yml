@@ -3,6 +3,10 @@ docker_auth: &docker_auth
     username: $DOCKER_USERNAME
     password: $DOCKER_PASSWORD
 
+vm_executor_image: &vm_executor_image
+  machine:
+    image: ubuntu-2204:2023.04.2    
+
 workspace: &workspace
   at: ~/vela-template-tester
 
@@ -24,10 +28,16 @@ pr_filter: &pr_filter
     branches:
       ignore: master
 
+orbs:
+  templates: devatherock/circleci-templates@0.5.0
+
 parameters:
   go_version:
     type: string
     default: "1.20"
+  repo_name:
+    type: string
+    default: "vela-template-tester"  
 
 executors:
   docker-executor:
@@ -43,33 +53,16 @@ executors:
     <<: *resource_class
     <<: *work_directory
   machine-executor:
-    machine:
-      image: ubuntu-2204:2023.04.2
+    <<: *vm_executor_image
     resource_class: medium
     <<: *work_directory
   arm-executor:
-    machine:
-      image: ubuntu-2004:2022.04.1
+    <<: *vm_executor_image
     resource_class: arm.medium
     <<: *work_directory
 
 version: 2.1
 jobs:
-  changelog_updater:
-    docker:
-      - image: devatherock/changelog-updater:0.1.0
-        <<: *docker_auth
-    <<: *resource_class
-    environment:
-      VELA_BUILD_AUTHOR: "renovate[bot]"
-      VELA_BUILD_AUTHOR_EMAIL: "29139614+renovate[bot]@users.noreply.github.com"
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "4a:86:fe:0e:c3:0e:ad:0d:1d:5c:3e:48:cf:28:39:5d"
-      - checkout
-      - run: sh /scripts/entry-point.sh
-
   test:
     executor: docker-executor
     steps:
@@ -131,28 +124,6 @@ jobs:
               -t devatherock/<< parameters.docker_image >>:$TAG \
               -t devatherock/<< parameters.docker_image >>:latest \
               << parameters.command_args >>
-
-  dockerhub_readme:
-    parameters:
-      docker_image:
-        type: string
-      image_type:
-        type: string
-    docker:
-      - image: peterevans/dockerhub-description:3.4.2
-        <<: *docker_auth
-    <<: *resource_class
-    <<: *work_directory
-    environment:
-      DOCKERHUB_REPOSITORY: 'devatherock/<< parameters.docker_image >>'
-      SHORT_DESCRIPTION: '<< parameters.image_type >> to test and validate vela-ci templates'
-      README_FILEPATH: README.md
-    steps:
-      - checkout
-      - attach_workspace:
-          <<: *workspace
-      - run: |
-          sh /entrypoint.sh
 
   test_plugin_single:
     executor: template-tester
@@ -217,18 +188,6 @@ jobs:
           command: |
             curl $RENDER_DEPLOY_HOOK
 
-  notify:
-    docker:
-      - image: devatherock/simple-slack:1.0.0
-        <<: *docker_auth
-    <<: *resource_class
-    environment:
-      TEXT: "Success: {{.CircleBuildUrl}} by {{.CircleUsername}}"
-      CHANNEL: general
-      TITLE: "Build completed"
-    steps:
-      - run: /bin/simpleslack -c "#33ad7f"
-
 workflows:
   version: 2.1
   build_deploy:
@@ -255,22 +214,24 @@ workflows:
           docker_image: 'vela-template-tester'
           requires:
             - build
-      - dockerhub_readme:
+      - templates/dockerhub_readme_update:
           name: dockerhub_readme_api
           context:
             - docker-credentials
             - dockerhub-readme-credentials
           docker_image: 'vela-template-tester-api'
-          image_type: 'API'
+          image_description: 'API to test and validate vela-ci templates'
+          work_dir: '~/<< pipeline.parameters.repo_name >>'
           requires:
             - publish_api
-      - dockerhub_readme:
+      - templates/dockerhub_readme_update:
           name: dockerhub_readme_plugin
           context:
             - docker-credentials
             - dockerhub-readme-credentials
-          docker_image: 'vela-template-tester'
-          image_type: 'Plugin'
+          docker_image: '<< pipeline.parameters.repo_name >>'
+          image_description: 'Plugin to test and validate vela-ci templates'
+          work_dir: '~/<< pipeline.parameters.repo_name >>'
           requires:
             - publish_plugin
       - test_plugin_single:
@@ -316,7 +277,8 @@ workflows:
           requires:
             - test_plugin_single
             - test_plugin_list
-      - notify:
+      - templates/slack:
+          name: notify
           context:
             - docker-credentials
             - slack-webhook
@@ -340,7 +302,8 @@ workflows:
           <<: *release_filter
           requires:
             - release_api
-      - notify:
+      - templates/slack:
+          name: notify
           context:
             - docker-credentials
             - slack-webhook
@@ -356,7 +319,8 @@ workflows:
             - docker-credentials
           docker_image: vela-template-tester
           <<: *release_filter
-      - notify:
+      - templates/slack:
+          name: notify
           context:
             - docker-credentials
             - slack-webhook
@@ -366,7 +330,8 @@ workflows:
 
   pr_check:
     jobs:
-      - changelog_updater:
+      - templates/changelog_updater:
+          name: changelog_updater
           context:
             - docker-credentials
             - changelog-updater-credentials

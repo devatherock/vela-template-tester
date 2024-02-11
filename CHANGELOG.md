@@ -1,22 +1,12 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `circleci-templates` orb for common tasks
+
 ### Changed
-- chore(deps): update devatherock/simple-slack docker tag to v1
 - Made only HIGH bolt vulnerabilities create issues
-- fix(deps): update module github.com/urfave/cli/v2 to v2.25.7
-- fix(deps): update go.starlark.net digest to 9532f56
-- fix(deps): update go.starlark.net digest to 2226322
-- fix(deps): update go.starlark.net digest to 08598ae
-- fix(deps): update go.starlark.net digest to 9b46791
-- fix(deps): update go.starlark.net digest to 2aa7575
-- chore(deps): update alpine docker tag to v3.18.4
 - chore(deps): bump golang.org/x/net from 0.9.0 to 0.17.0
-- fix(deps): update go.starlark.net digest to 556fd59
-- fix(deps): update go.starlark.net digest to 90ade8b
-- chore(deps): update alpine docker tag to v3.18.5
-- fix(deps): update module github.com/urfave/cli/v2 to v2.26.0
-- chore(deps): update alpine docker tag to v3.19.0
 - fix(deps): update module github.com/urfave/cli/v2 to v2.27.1
 - fix(deps): update go.starlark.net digest to f864706
 - chore(deps): update alpine docker tag to v3.19.1
