@@ -10,6 +10,7 @@
 - fix(deps): update module github.com/urfave/cli/v2 to v2.27.1
 - fix(deps): update go.starlark.net digest to f864706
 - chore(deps): update alpine docker tag to v3.19.1
+- fix(deps): update module github.com/stretchr/testify to v1.9.0
 
 ### Removed
 - Trailing spaces in yaml files
