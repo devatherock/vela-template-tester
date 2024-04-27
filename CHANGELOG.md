@@ -15,6 +15,7 @@
 - fix(deps): update go.starlark.net digest to ee8ed14
 - fix(deps): update go.starlark.net digest to e6e8e7c
 - fix(deps): update go.starlark.net digest to 9b43f0a
+- chore(deps): update templates orb to v0.6.0
 
 ### Removed
 - Trailing spaces in yaml files
