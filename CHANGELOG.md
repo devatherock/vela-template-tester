@@ -17,6 +17,7 @@
 - fix(deps): update go.starlark.net digest to 9b43f0a
 - chore(deps): update templates orb to v0.6.0
 - fix(deps): update module github.com/urfave/cli/v2 to v2.27.2
+- chore(deps): update templates orb to v0.7.0
 
 ### Removed
 - Trailing spaces in yaml files
