@@ -16,6 +16,7 @@
 - chore(deps): update alpine docker tag to v3.20.2
 - fix(deps): update module github.com/urfave/cli/v2 to v2.27.4
 - chore(deps): bump golang.org/x/crypto from 0.14.0 to 0.17.0
+- chore(deps): bump golang.org/x/net from 0.17.0 to 0.23.0
 
 ### Removed
 - Trailing spaces in yaml files
