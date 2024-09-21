@@ -18,6 +18,7 @@
 - chore(deps): bump golang.org/x/crypto from 0.14.0 to 0.17.0
 - Upgraded `golang.org/x/net` to `0.23.0`
 - fix(deps): update go.starlark.net digest to 42030a7
+- chore(deps): update alpine docker tag to v3.20.3
 
 ### Removed
 - Trailing spaces in yaml files
