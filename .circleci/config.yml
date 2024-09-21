@@ -71,7 +71,7 @@ jobs:
           keys:
             - v1-pkg-cache-{{ checksum "go.mod" }}
             - v1-pkg-cache
-      - run: make check
+      - run: make check coveralls
 
   fast_functional_test:
     parameters:
@@ -97,7 +97,7 @@ jobs:
           make integration-test
       - save_cache:
           paths:
-            - "/home/circleci/go/pkg"
+            - ~/go/pkg
           key: v1-pkg-cache-{{ checksum "go.mod" }}
 
   publish:
