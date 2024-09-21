@@ -19,6 +19,7 @@
 - Upgraded `golang.org/x/net` to `0.23.0`
 - fix(deps): update go.starlark.net digest to 42030a7
 - chore(deps): update alpine docker tag to v3.20.3
+- fix(deps): update module github.com/masterminds/sprig/v3 to v3.3.0
 
 ### Removed
 - Trailing spaces in yaml files
