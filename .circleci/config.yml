@@ -34,7 +34,7 @@ orbs:
 parameters:
   go_version:
     type: string
-    default: "1.20"
+    default: "1.23"
   repo_name:
     type: string
     default: "vela-template-tester"  

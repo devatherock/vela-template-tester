@@ -6,20 +6,14 @@
 
 ### Changed
 - Made only HIGH bolt vulnerabilities create issues
-- chore(deps): bump golang.org/x/net from 0.9.0 to 0.17.0
-- chore(deps): update alpine docker tag to v3.19.1
 - fix(deps): update module github.com/stretchr/testify to v1.9.0
-- fix(deps): update go.starlark.net digest to 9b43f0a
-- fix(deps): update module github.com/urfave/cli/v2 to v2.27.2
-- chore(deps): update alpine docker tag to v3.20.0
-- chore(deps): update alpine docker tag to v3.20.1
-- chore(deps): update alpine docker tag to v3.20.2
 - fix(deps): update module github.com/urfave/cli/v2 to v2.27.4
 - chore(deps): bump golang.org/x/crypto from 0.14.0 to 0.17.0
 - Upgraded `golang.org/x/net` to `0.23.0`
 - fix(deps): update go.starlark.net digest to 42030a7
 - chore(deps): update alpine docker tag to v3.20.3
 - fix(deps): update module github.com/masterminds/sprig/v3 to v3.3.0
+- Upgraded go to `1.23`
 
 ### Removed
 - Trailing spaces in yaml files
