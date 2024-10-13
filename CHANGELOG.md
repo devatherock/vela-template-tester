@@ -15,6 +15,7 @@
 - fix(deps): update module github.com/masterminds/sprig/v3 to v3.3.0
 - Upgraded go to `1.23`
 - fix(deps): update go.starlark.net digest to 1207426
+- fix(deps): update module github.com/urfave/cli/v2 to v2.27.5
 
 ### Removed
 - Trailing spaces in yaml files
