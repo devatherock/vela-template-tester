@@ -19,6 +19,7 @@
 - fix(deps): update go.starlark.net digest to d4d7611
 - fix(deps): update module github.com/stretchr/testify to v1.10.0
 - fix(deps): update go.starlark.net digest to c05ff20
+- chore(deps): update alpine docker tag to v3.21.0
 
 ### Removed
 - Trailing spaces in yaml files
