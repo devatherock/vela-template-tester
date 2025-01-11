@@ -7,7 +7,7 @@ WORKDIR /home/workspace
 RUN go build -o bin/ ./cmd/plugin
 
 
-FROM alpine:3.21.0
+FROM alpine:3.21.2
 
 COPY --from=build /home/workspace/bin/plugin /bin/velatemplatetesterplugin
 
