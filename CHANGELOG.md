@@ -26,6 +26,7 @@
 - fix(deps): update go.starlark.net digest to d908c3e
 - fix(deps): update go.starlark.net digest to 492d367
 - chore(deps): update alpine docker tag to v3.21.3
+- fix(deps): update go.starlark.net digest to 0d3f41d
 
 ### Removed
 - Trailing spaces in yaml files
