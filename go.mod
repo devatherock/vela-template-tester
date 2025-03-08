@@ -8,7 +8,7 @@ require (
 	github.com/qri-io/starlib v0.5.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
-	github.com/urfave/cli/v2 v2.27.5
+	github.com/urfave/cli/v2 v2.27.6
 	go.starlark.net v0.0.0-20250225190231-0d3f41d403af
 	gopkg.in/yaml.v2 v2.4.0
 )
