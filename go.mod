@@ -1,6 +1,6 @@
 module github.com/devatherock/vela-template-tester
 
-go 1.23
+go 1.25.0
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
@@ -9,7 +9,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
-	go.starlark.net v0.0.0-20250318223901-d9371fef63fe
+	go.starlark.net v0.0.0-20260904161901-6ecada49e42f
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -41,7 +41,7 @@ require (
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/tools v0.8.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
