@@ -29,6 +29,7 @@
 - fix(deps): update go.starlark.net digest to 0d3f41d
 - fix(deps): update module github.com/urfave/cli/v2 to v2.27.6
 - fix(deps): update go.starlark.net digest to d9371fe
+- chore(deps): update module golang.org/x/crypto to v0.52.0 [security]
 
 ### Removed
 - Trailing spaces in yaml files
