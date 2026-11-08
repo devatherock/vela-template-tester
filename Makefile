@@ -1,6 +1,7 @@
 docker_tag=latest
 skip_pull=false
 all=false
+go_version=1.25
 
 clean:
 	rm -f coverage.out
@@ -36,7 +37,9 @@ build-all:
 integration-test:
 	go test -v ./... -tags integration
 docker-build-plugin:
-	docker build -t devatherock/vela-template-tester:$(docker_tag) \
+	docker build \
+		--build-arg GO_VERSION=$(go_version) \
+		-t devatherock/vela-template-tester:$(docker_tag) \
 	    -f build/Plugin.Dockerfile .
 functional-test-plugin:
 ifneq ($(skip_pull), true)
@@ -44,7 +47,9 @@ ifneq ($(skip_pull), true)
 endif
 	go test -v ./... -tags functional
 docker-build-api:
-	docker build -t devatherock/vela-template-tester-api:$(docker_tag) \
+	docker build \
+		--build-arg GO_VERSION=$(go_version) \
+		-t devatherock/vela-template-tester-api:$(docker_tag) \
 	    -f build/Api.Dockerfile .
 functional-test-api:
 ifneq ($(skip_pull), true)

@@ -5,7 +5,7 @@ docker_auth: &docker_auth
 
 vm_executor_image: &vm_executor_image
   machine:
-    image: ubuntu-2204:2023.04.2    
+    image: ubuntu-2204:2026.10.1    
 
 workspace: &workspace
   at: ~/vela-template-tester
@@ -34,7 +34,7 @@ orbs:
 parameters:
   go_version:
     type: string
-    default: "1.23"
+    default: "1.25"
   repo_name:
     type: string
     default: "vela-template-tester"  
@@ -81,7 +81,8 @@ jobs:
     steps:
       - checkout
       - run: |
-          make docker-build-<< parameters.image_type >> functional-test-<< parameters.image_type >> skip_pull=true
+          make docker-build-<< parameters.image_type >> functional-test-<< parameters.image_type >> \
+            skip_pull=true go_version=<< pipeline.parameters.go_version >>
 
   build:
     executor: docker-executor
