@@ -81,7 +81,8 @@ jobs:
     steps:
       - checkout
       - run: |
-          make docker-build-<< parameters.image_type >> functional-test-<< parameters.image_type >> skip_pull=true
+          make docker-build-<< parameters.image_type >> functional-test-<< parameters.image_type >> \
+            skip_pull=true go_version=<< pipeline.parameters.go_version >>
 
   build:
     executor: docker-executor
