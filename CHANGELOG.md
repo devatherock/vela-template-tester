@@ -31,6 +31,7 @@
 - fix(deps): update go.starlark.net digest to d9371fe
 - chore(deps): update module golang.org/x/net to v0.55.0 [security]
 - chore(deps): update module golang.org/x/crypto to v0.52.0 [security]
+- fix(deps): update go.starlark.net digest to 4f4267f
 
 ### Removed
 - Trailing spaces in yaml files
