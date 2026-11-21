@@ -33,6 +33,7 @@
 - chore(deps): update module golang.org/x/crypto to v0.52.0 [security]
 - fix(deps): update go.starlark.net digest to 4f4267f
 - fix(deps): update module github.com/urfave/cli/v2 to v2.27.7
+- chore(deps): update alpine docker tag to v3.24.4
 
 ### Removed
 - Trailing spaces in yaml files
