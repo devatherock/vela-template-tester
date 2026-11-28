@@ -35,6 +35,7 @@
 - fix(deps): update module github.com/urfave/cli/v2 to v2.27.7
 - chore(deps): update alpine docker tag to v3.24.4
 - fix(deps): update module github.com/sirupsen/logrus to v1.10.2
+- fix(deps): update module github.com/urfave/cli/v2 to v3
 
 ### Removed
 - Trailing spaces in yaml files
